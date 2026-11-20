@@ -1,0 +1,3560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Merlin Resorts — Live Queue Times, Map & Guide</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            merlinGreen: '#007A53',
+            merlinGreenDark: '#005B3E',
+            merlinTeal: '#009B77',
+            merlinTealDark: '#007358',
+            merlinGold: '#F5B82E',
+            merlinNavy: '#1B244B',
+            merlinCoral: '#E05A47',
+            merlinCream: '#F4F5F7'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --resort-primary: #007A53;
+      --resort-primary-dark: #005B3E;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      background-color: #FFFFFF;
+      color: #1B244B;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .resort-bg-primary {
+      background-color: var(--resort-primary);
+    }
+
+    .resort-bg-primary-hover:hover {
+      background-color: var(--resort-primary-dark);
+    }
+
+    .resort-text-primary {
+      color: var(--resort-primary);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .cw-tile-thumb {
+      width: 68px;
+      height: 52px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: #E2E8F0;
+      position: relative;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .cw-tile-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20 antialiased selection:bg-emerald-600 selection:text-white bg-white">
+
+  <!-- =========================================================
+       TOP HEADER BAR (Shown on Explore, Map, Info & Operations)
+       ========================================================= -->
+  <header id="top-app-header" class="sticky top-0 z-30 resort-bg-primary text-white shadow-sm transition-colors duration-200">
+    <div class="max-w-lg mx-auto px-3.5 pt-2.5 pb-2 flex items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="h-10 w-10 shrink-0 rounded-xl bg-white p-0.5 shadow-xs overflow-hidden">
+          <img
+            id="header-resort-logo"
+            data-role="logo"
+            alt="Resort Logo"
+            class="h-full w-full object-contain rounded-[9px]"
+          />
+        </div>
+        <div class="min-w-0">
+          <h1 id="header-resort-title" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight truncate">
+            Chessington Queues
+          </h1>
+          <p id="header-resort-subtitle" class="text-[11px] font-semibold text-white/85 truncate">
+            World of Adventures Resort
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-1.5 py-1 text-xs font-bold text-white tabular-nums">
+          <span class="h-2.5 w-2.5 rounded-full bg-merlinGold"></span>
+          <span><span id="countdown-sec">58</span>s</span>
+        </span>
+        <button
+          type="button"
+          onclick="manualSyncNow()"
+          aria-label="Sync live times"
+          class="rounded-full bg-white/15 hover:bg-white/25 active:scale-95 px-3 py-1 text-xs font-extrabold text-white transition cursor-pointer"
+        >
+          Sync
+        </button>
+      </div>
+    </div>
+
+    <!-- 3-Pill Resort Switcher Strip -->
+    <div class="max-w-lg mx-auto px-3.5 pb-2.5">
+      <div class="grid grid-cols-3 gap-1.5 rounded-full bg-black/15 p-1">
+        <button
+          type="button"
+          id="resort-pill-chessington"
+          onclick="switchResort('chessington')"
+          class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer bg-white text-merlinNavy shadow-xs"
+        >
+          Chessington
+        </button>
+        <button
+          type="button"
+          id="resort-pill-legoland"
+          onclick="switchResort('legoland')"
+          class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer text-white/90 hover:text-white"
+        >
+          LEGOLAND
+        </button>
+        <button
+          type="button"
+          id="resort-pill-thorpe"
+          onclick="switchResort('thorpe')"
+          class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer text-white/90 hover:text-white"
+        >
+          Thorpe Park
+        </button>
+      </div>
+    </div>
+
+    <!-- Global Quick Search Bar -->
+    <div id="search-bar-wrapper" class="max-w-lg mx-auto px-3.5 pb-2.5">
+      <div class="relative">
+        <input
+          id="ride-search-input"
+          type="search"
+          placeholder="Search attractions..."
+          oninput="syncSearchInputs(this.value)"
+          class="w-full rounded-xl bg-white text-slate-900 placeholder-slate-400 pl-9 pr-4 py-1.5 text-xs sm:text-sm font-semibold shadow-inner focus:outline-none focus:ring-2 focus:ring-merlinGold"
+        />
+        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MAIN CONTENT CONTAINER
+       ========================================================= -->
+  <main class="max-w-lg mx-auto">
+
+    <!-- =====================================================
+         TAB 1: EXPLORE
+         ===================================================== -->
+    <section id="tab-explore" class="hidden px-3.5 pt-3.5 pb-4 space-y-3.5 bg-slate-50 min-h-[calc(100vh-140px)]">
+      <!-- Resort Hero Banner -->
+      <div class="relative rounded-2xl overflow-hidden shadow-md bg-merlinNavy h-44 sm:h-48">
+        <img
+          id="hero-entrance-img"
+          alt="Resort Entrance"
+          decoding="async"
+          class="h-full w-full object-cover opacity-90"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+        <div class="absolute bottom-3 left-3.5 right-3.5 text-white">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="rounded-full bg-merlinGold text-merlinNavy px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
+              Official Guide
+            </span>
+            <span id="explore-live-count-badge" class="rounded-full bg-white/20 backdrop-blur px-2.5 py-0.5 text-[10px] font-bold">
+              30 Attractions
+            </span>
+          </div>
+          <h2 id="explore-hero-heading" class="text-base sm:text-lg font-extrabold leading-snug">
+            Britain’s Wildest Adventure Awaits
+          </h2>
+        </div>
+      </div>
+
+      <!-- Park Opening Hours Card (Today + Optional Upcoming Park Hours) -->
+      <div class="rounded-2xl bg-white px-3.5 py-3 shadow-sm border border-slate-200/90 space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-merlinTeal/15 text-merlinTealDark font-black text-sm">🕒</span>
+            <div class="min-w-0">
+              <div id="explore-park-hours-caption" class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                Park Opening Hours (Today)
+              </div>
+              <div id="explore-park-hours-text" class="text-xs sm:text-sm font-extrabold text-merlinNavy truncate tabular-nums">
+                10:00 – 17:00
+              </div>
+            </div>
+          </div>
+          <span id="explore-park-event-badge" class="rounded-lg bg-merlinGold/35 text-merlinNavy px-2.5 py-1 text-[10px] font-extrabold shrink-0">
+            Open Today
+          </span>
+        </div>
+
+        <div id="guest-upcoming-park-hours-section" class="hidden pt-2 border-t border-slate-100 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <label for="guest-hours-date-picker" class="text-[11px] font-bold text-slate-600 shrink-0">View Hours for Date:</label>
+            <div class="flex items-center gap-1.5">
+              <input
+                id="guest-hours-date-picker"
+                type="date"
+                onchange="handleGuestHoursDateChange(this.value)"
+                class="rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1 text-[11px] font-extrabold text-merlinNavy"
+              />
+              <button
+                type="button"
+                id="guest-hours-today-btn"
+                onclick="resetGuestHoursDateToToday()"
+                class="hidden rounded-lg resort-bg-primary text-white px-2.5 py-1 text-[10px] font-extrabold cursor-pointer"
+              >
+                Today
+              </button>
+            </div>
+          </div>
+          <div id="guest-upcoming-park-dates-list" class="space-y-1"></div>
+        </div>
+      </div>
+
+      <!-- Live Quick Stats Strip -->
+      <div id="explore-stats-strip" class="grid grid-cols-3 gap-2">
+        <div class="rounded-2xl bg-white p-3 shadow-sm border border-slate-200/80 text-center">
+          <div id="stat-open-count" class="text-lg font-extrabold resort-text-primary tabular-nums">0</div>
+          <div class="text-[11px] font-bold text-slate-500">Rides Open</div>
+        </div>
+        <div class="rounded-2xl bg-white p-3 shadow-sm border border-slate-200/80 text-center">
+          <div id="stat-avg-wait" class="text-lg font-extrabold text-merlinNavy tabular-nums">0m</div>
+          <div class="text-[11px] font-bold text-slate-500">Avg Queue</div>
+        </div>
+        <div class="rounded-2xl bg-white p-3 shadow-sm border border-slate-200/80 text-center">
+          <div id="stat-closed-count" class="text-lg font-extrabold text-merlinCoral tabular-nums">30</div>
+          <div class="text-[11px] font-bold text-slate-500">Closed</div>
+        </div>
+      </div>
+
+      <!-- Interactive Park Map Card Preview -->
+      <div id="explore-map-card" class="rounded-2xl bg-white p-3 shadow-sm border border-slate-200/80 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold text-merlinNavy">Interactive Resort Map</h3>
+            <p class="text-[11px] text-slate-500">Tap to open live pins & themed lands</p>
+          </div>
+          <button
+            type="button"
+            onclick="switchTab('map')"
+            class="rounded-xl resort-bg-primary resort-bg-primary-hover text-white px-3 py-1.5 text-xs font-extrabold transition cursor-pointer"
+          >
+            Open Map
+          </button>
+        </div>
+        <div
+          onclick="switchTab('map')"
+          class="relative h-36 w-full rounded-xl overflow-hidden border border-slate-200 cursor-pointer bg-emerald-50"
+        >
+          <canvas id="explore-map-canvas" class="w-full h-full block"></canvas>
+          <span class="absolute bottom-2 right-2 rounded-lg bg-black/75 text-white px-2.5 py-1 text-[10px] font-bold">
+            Tap to explore map
+          </span>
+        </div>
+      </div>
+
+      <!-- Resort Spotlight Card -->
+      <div class="rounded-2xl bg-white p-3.5 shadow-sm border border-slate-200/80 flex items-center gap-3">
+        <div class="h-14 w-14 shrink-0 rounded-2xl bg-slate-50 border border-slate-200 p-1 overflow-hidden">
+          <img
+            id="spotlight-resort-logo"
+            data-role="logo"
+            alt="Resort Crest"
+            class="h-full w-full object-contain rounded-xl"
+          />
+        </div>
+        <div class="min-w-0 flex-1">
+          <h4 class="text-xs sm:text-sm font-extrabold text-merlinNavy">Live Wait Times</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed mt-0.5">
+            Switch between Thrills and Family queues sorted shortest-to-longest, with closed rides at the bottom.
+          </p>
+        </div>
+        <button
+          type="button"
+          onclick="switchTab('rides')"
+          class="shrink-0 rounded-xl bg-merlinGold text-merlinNavy px-3 py-2 text-xs font-extrabold hover:brightness-95 transition cursor-pointer"
+        >
+          Queues
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         TAB 2: LIVE QUEUES (Matches Screenshot Visual Design)
+         ===================================================== -->
+    <section id="tab-rides" class="space-y-0">
+      <!-- Top Green Header + 3-Pill Resort Switcher + THRILLS / FAMILY Tabs -->
+      <div class="resort-bg-primary text-white transition-colors duration-200">
+        <div class="px-3.5 pt-2.5 pb-2 flex items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="h-10 w-10 shrink-0 rounded-xl bg-white p-0.5 shadow-xs overflow-hidden">
+              <img
+                id="queues-resort-logo"
+                data-role="logo"
+                alt="Resort Crest"
+                class="h-full w-full object-contain rounded-[9px]"
+              />
+            </div>
+            <h1 id="queues-resort-name-label" class="text-[17px] sm:text-lg font-extrabold tracking-tight truncate leading-tight">
+              Chessington Queues
+            </h1>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-white tabular-nums">
+              <span class="h-2.5 w-2.5 rounded-full bg-merlinGold"></span>
+              <span id="queues-countdown-sec">58</span>s
+            </span>
+            <button
+              type="button"
+              onclick="manualSyncNow()"
+              class="rounded-full bg-white/15 hover:bg-white/25 active:scale-95 px-3 py-1 text-xs font-extrabold text-white transition cursor-pointer"
+            >
+              Sync
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Pill Resort Switcher Strip -->
+        <div class="px-3.5 pb-2.5">
+          <div class="grid grid-cols-3 gap-1.5 rounded-full bg-black/15 p-1">
+            <button
+              type="button"
+              id="q-resort-pill-chessington"
+              onclick="switchResort('chessington')"
+              class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer bg-white text-merlinNavy shadow-xs"
+            >
+              Chessington
+            </button>
+            <button
+              type="button"
+              id="q-resort-pill-legoland"
+              onclick="switchResort('legoland')"
+              class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer text-white/90 hover:text-white"
+            >
+              LEGOLAND
+            </button>
+            <button
+              type="button"
+              id="q-resort-pill-thorpe"
+              onclick="switchResort('thorpe')"
+              class="rounded-full py-1 text-xs font-extrabold transition cursor-pointer text-white/90 hover:text-white"
+            >
+              Thorpe Park
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Tabs Bar: THRILLS (Circle-Triangle) | FAMILY (Circle-Square) -->
+        <div class="grid grid-cols-2 text-center border-t border-white/10" role="tablist" aria-label="Ride categories">
+          <button
+            type="button"
+            role="tab"
+            id="cat-tab-Thrills"
+            aria-selected="true"
+            onclick="selectRideCategory('Thrills')"
+            class="relative py-2.5 flex flex-col items-center justify-center gap-1 text-white transition cursor-pointer"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="12" cy="12" r="9.5" />
+              <path d="M12 8.2L15.6 14.5H8.4L12 8.2Z" stroke-linejoin="round" />
+            </svg>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider leading-none">THRILLS</span>
+            <span id="cat-bar-Thrills" class="absolute bottom-0 left-0 right-0 h-[3px] bg-white"></span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            id="cat-tab-Family"
+            aria-selected="false"
+            onclick="selectRideCategory('Family')"
+            class="relative py-2.5 flex flex-col items-center justify-center gap-1 text-white/80 hover:text-white transition cursor-pointer"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="12" cy="12" r="9.5" />
+              <rect x="8.8" y="8.8" width="6.4" height="6.4" rx="1" />
+            </svg>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider leading-none">FAMILY</span>
+            <span id="cat-bar-Family" class="hidden absolute bottom-0 left-0 right-0 h-[3px] bg-white"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Optional Search Bar (Hidden by default so rows start immediately under tab bar like screenshot) -->
+      <div id="queues-search-row" class="hidden px-3.5 py-2 bg-slate-50 border-b border-[#E5E7EB]">
+        <div class="relative">
+          <input
+            id="queues-inline-search"
+            type="search"
+            placeholder="Filter attractions by name or note..."
+            oninput="syncSearchInputs(this.value)"
+            class="w-full rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 pl-8 pr-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-merlinGold"
+          />
+          <span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+        </div>
+      </div>
+
+      <!-- Crisp Horizontal White Ride Rows -->
+      <div id="rides-list-container" class="bg-white divide-y divide-[#E5E7EB] border-b border-[#E5E7EB]"></div>
+    </section>
+
+    <!-- =====================================================
+         TAB 3: INTERACTIVE MAP
+         ===================================================== -->
+    <section id="tab-map" class="hidden px-3.5 pt-3.5 pb-4 space-y-3 bg-slate-50 min-h-[calc(100vh-140px)]">
+      <div id="map-unavailable-banner" class="hidden rounded-2xl bg-amber-50 border border-amber-200 p-5 text-center space-y-1">
+        <div class="text-sm font-extrabold text-amber-950">Interactive Map Temporarily Unavailable</div>
+        <p class="text-xs text-amber-900">Please check Live Queues or Explore for current attraction availability.</p>
+      </div>
+
+      <div id="map-active-workspace" class="space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 id="map-heading-title" class="text-base font-extrabold text-merlinNavy">Resort Map</h2>
+            <p class="text-[11px] text-slate-500">Tap any pin to inspect live queue & status</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="adjustMapZoom(0.25)" class="rounded-xl bg-white border border-slate-200 px-2.5 py-1.5 text-xs font-extrabold shadow-xs hover:bg-slate-50 cursor-pointer">+</button>
+            <button type="button" onclick="adjustMapZoom(-0.25)" class="rounded-xl bg-white border border-slate-200 px-2.5 py-1.5 text-xs font-extrabold shadow-xs hover:bg-slate-50 cursor-pointer">−</button>
+            <button type="button" onclick="resetMapView()" class="rounded-xl resort-bg-primary text-white px-2.5 py-1.5 text-xs font-extrabold shadow-xs cursor-pointer">Reset</button>
+          </div>
+        </div>
+
+        <div id="map-zone-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"></div>
+
+        <div class="relative rounded-2xl overflow-hidden bg-emerald-50 border border-slate-200 shadow-sm h-[370px] sm:h-[420px]">
+          <canvas id="full-map-canvas" class="w-full h-full block touch-none cursor-grab active:cursor-grabbing"></canvas>
+          <div id="map-source-label" class="absolute top-2.5 left-2.5 rounded-lg bg-white/95 backdrop-blur px-2.5 py-1 text-[10px] font-extrabold text-slate-700 shadow-xs">
+            Merlin Resort Map • 100%
+          </div>
+        </div>
+
+        <div id="map-selected-card" class="hidden rounded-2xl bg-white p-3.5 shadow-md border border-slate-200 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div id="map-card-land" class="text-[10px] font-extrabold uppercase tracking-wider resort-text-primary">Themed Land</div>
+            <h3 id="map-card-title" class="text-sm font-extrabold text-merlinNavy truncate">Attraction</h3>
+            <p id="map-card-status" class="text-xs font-bold text-slate-600 mt-0.5">Status</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              id="map-card-details-btn"
+              class="rounded-xl resort-bg-primary text-white px-3 py-2 text-xs font-extrabold cursor-pointer"
+            >
+              Details
+            </button>
+            <button
+              type="button"
+              onclick="closeMapPinCard()"
+              aria-label="Close pin card"
+              class="rounded-xl bg-slate-100 text-slate-600 px-2.5 py-2 text-xs font-extrabold cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         TAB 4: INFO (Ride Availability Percentage + Notices + '..' Trigger)
+         ===================================================== -->
+    <section id="tab-downtime" class="hidden px-3.5 pt-3.5 pb-4 space-y-3.5 bg-slate-50 min-h-[calc(100vh-140px)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-extrabold text-merlinNavy">Resort Info & Availability</h2>
+          <p id="avail-resort-subtitle" class="text-[11px] text-slate-500">Live operating percentage across attractions</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200/90 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Ride Availability</div>
+            <div id="avail-overall-pct" class="text-2xl font-extrabold text-merlinNavy tabular-nums leading-tight mt-0.5">0%</div>
+          </div>
+          <div class="text-right">
+            <span id="avail-open-ratio" class="inline-flex items-center rounded-xl bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-extrabold text-emerald-800 tabular-nums">
+              0 / 30
+            </span>
+            <div class="text-[10px] font-bold text-slate-400 mt-1">Attractions Operating</div>
+          </div>
+        </div>
+
+        <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
+          <div id="avail-overall-bar" class="h-full rounded-full resort-bg-primary transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-0.5">
+          <div class="rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-600">Thrills</span>
+            <span id="avail-thrills-pct" class="text-xs font-extrabold text-merlinNavy tabular-nums">0%</span>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-600">Family</span>
+            <span id="avail-family-pct" class="text-xs font-extrabold text-merlinNavy tabular-nums">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="downtime-unavailable-banner" class="hidden rounded-2xl bg-amber-50 border border-amber-200 p-4 text-center space-y-1">
+        <div class="text-xs font-extrabold text-amber-950">Attraction Notices Temporarily Unavailable</div>
+        <p class="text-[11px] text-amber-900">Check Live Queues for current ride status.</p>
+      </div>
+
+      <div id="downtime-content-sections" class="space-y-3">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Current Attraction Notices</h3>
+            <span id="dt-active-badge" class="rounded-full bg-rose-100 text-rose-800 px-2.5 py-0.5 text-[10px] font-extrabold">0 Active</span>
+          </div>
+          <div id="active-downtime-list" class="space-y-2"></div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Resolved Earlier Today</h3>
+            <button
+              type="button"
+              id="dt-clear-history-btn"
+              onclick="clearCompletedDowntimeHistory()"
+              class="hidden text-[11px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+            >
+              Clear Resolved
+            </button>
+          </div>
+          <div id="completed-downtime-list" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Discreet '..' Trigger at Bottom of Info Tab -->
+      <div class="pt-4 pb-2 text-center">
+        <button
+          type="button"
+          onclick="switchTab('admin')"
+          aria-label="More"
+          class="inline-flex items-center justify-center rounded-lg px-4 py-1.5 text-sm font-extrabold tracking-widest text-slate-400 hover:text-slate-600 cursor-pointer"
+        >
+          ..
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         TAB 5: HIDDEN OPERATIONS PANEL (Passcode: CWOA26)
+         ===================================================== -->
+    <section id="tab-admin" class="hidden px-3.5 pt-3.5 pb-4 space-y-4 bg-slate-50 min-h-[calc(100vh-140px)]">
+      <div id="admin-lock-gate" class="rounded-2xl bg-white p-5 shadow-sm border border-slate-200 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="flex h-10 w-10 items-center justify-center rounded-2xl resort-bg-primary text-white text-lg">🔐</span>
+          <div>
+            <h2 class="text-sm font-extrabold text-merlinNavy">Staff Operations Access</h2>
+            <p class="text-[11px] text-slate-500">Enter staff passcode to manage queues, hours & attractions</p>
+          </div>
+        </div>
+        <form onsubmit="unlockAdminPanel(event)" class="space-y-2.5">
+          <input
+            id="admin-passcode-input"
+            type="password"
+            autocomplete="off"
+            placeholder="Enter staff passcode"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-merlinGold"
+          />
+          <p id="admin-passcode-error" class="hidden text-xs font-bold text-rose-600">Incorrect passcode.</p>
+          <button
+            type="submit"
+            class="w-full rounded-xl resort-bg-primary resort-bg-primary-hover text-white py-2.5 text-xs font-extrabold uppercase tracking-wider transition cursor-pointer"
+          >
+            Unlock Controls
+          </button>
+        </form>
+      </div>
+
+      <div id="admin-controls-panel" class="hidden space-y-4">
+        <div class="flex items-center justify-between gap-2 rounded-2xl bg-merlinNavy text-white px-4 py-3">
+          <div>
+            <div id="admin-active-resort-banner" class="text-xs font-extrabold text-merlinGold">Unlocked • Chessington</div>
+            <div id="cloud-sync-status-label" class="text-[11px] text-white/80">Cloud RTDB: Connecting...</div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="forcePushCloudNow()" class="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-2.5 py-1 text-[10px] font-extrabold cursor-pointer">Push</button>
+            <button type="button" onclick="forcePullCloudNow()" class="rounded-lg bg-sky-600 hover:bg-sky-500 px-2.5 py-1 text-[10px] font-extrabold cursor-pointer">Pull</button>
+            <button type="button" onclick="lockAdminPanel()" class="rounded-lg bg-white/15 hover:bg-white/25 px-3 py-1.5 text-[11px] font-bold cursor-pointer">Lock</button>
+          </div>
+        </div>
+
+        <!-- Feature & Upcoming Hours Display Toggles -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-2.5">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Feature & Schedule Display Toggles</h3>
+          <p class="text-[11px] text-slate-500">Optional settings control whether upcoming park and ride opening hours appear to guests.</p>
+
+          <div class="space-y-2 pt-1 text-xs">
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-amber-50/70 border border-amber-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-merlinNavy">Show Upcoming Park Opening Times (Optional)</span>
+              <input id="adm-show-upcoming-park" type="checkbox" onchange="toggleUpcomingDisplaySetting('showUpcomingParkHours', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-amber-50/70 border border-amber-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-merlinNavy">Show Upcoming Ride Opening Times (Optional)</span>
+              <input id="adm-show-upcoming-rides" type="checkbox" onchange="toggleUpcomingDisplaySetting('showUpcomingRideHours', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Interactive Map Tab & Card</span>
+              <input id="adm-feat-map" type="checkbox" onchange="toggleFeatureAvailability('mapEnabled', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Live Queues List</span>
+              <input id="adm-feat-queues" type="checkbox" onchange="toggleFeatureAvailability('queuesEnabled', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Attraction Search Bar</span>
+              <input id="adm-feat-search" type="checkbox" onchange="toggleFeatureAvailability('searchEnabled', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Explore Quick Stats Strip</span>
+              <input id="adm-feat-stats" type="checkbox" onchange="toggleFeatureAvailability('statsEnabled', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Info Tab Notices & Availability</span>
+              <input id="adm-feat-downtime" type="checkbox" onchange="toggleFeatureAvailability('downtimeLogEnabled', this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Show Downtime Duration on All Ride Tiles</span>
+              <input id="adm-global-show-downtime" type="checkbox" onchange="toggleGlobalShowDowntime(this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+
+            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 cursor-pointer">
+              <span class="font-bold text-slate-800">Keep Downtime Active After Closing Time</span>
+              <input id="adm-global-force-downtime" type="checkbox" onchange="toggleForceDowntimeAfterClose(this.checked)" class="h-4 w-4 rounded cursor-pointer" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Default Park Opening Hours -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Default Park Opening Hours</h3>
+          <form onsubmit="saveParkHours(event)" class="space-y-2.5">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Opens</label>
+                <input id="adm-park-open" type="time" value="10:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Closes</label>
+                <input id="adm-park-close" type="time" value="17:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Day Badge Label</label>
+              <input id="adm-park-event-label" type="text" placeholder="e.g. Open Today or Winter Event" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="submit" class="rounded-xl resort-bg-primary resort-bg-primary-hover text-white py-2 text-xs font-extrabold cursor-pointer">Save Hours</button>
+              <button type="button" onclick="setParkClosedToday()" class="rounded-xl bg-merlinCoral hover:brightness-95 text-white py-2 text-xs font-extrabold cursor-pointer">Set Closed</button>
+              <button type="button" onclick="resetParkHoursDefault()" class="rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 py-2 text-xs font-extrabold cursor-pointer">Reset</button>
+            </div>
+          </form>
+          <p id="park-hours-feedback" class="hidden text-xs font-bold text-emerald-700"></p>
+        </div>
+
+        <!-- Advance Date-Scheduled Park & Attraction Opening Hours -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Advance Date Opening Hours (By Day)</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Target Date</label>
+              <input id="adv-sched-date" type="date" onchange="loadAdvanceDateScheduleIntoForm()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Day Note (Optional)</label>
+              <input id="adv-sched-label" type="text" placeholder="e.g. Christmas Season" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Park Opens</label>
+              <input id="adv-sched-open" type="time" value="10:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Park Closes</label>
+              <input id="adv-sched-close" type="time" value="17:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="saveAdvanceParkSchedule(false)" class="rounded-xl resort-bg-primary text-white py-2 text-xs font-extrabold cursor-pointer">Save Park Day Hours</button>
+            <button type="button" onclick="saveAdvanceParkSchedule(true)" class="rounded-xl bg-merlinCoral text-white py-2 text-xs font-extrabold cursor-pointer">Mark Park Closed Day</button>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 space-y-2">
+            <label class="block text-[11px] font-bold text-slate-600">Attraction Hours for Selected Date</label>
+            <select id="adv-ride-select" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white"></select>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="adv-ride-open" type="time" value="10:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+              <input id="adv-ride-close" type="time" value="17:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="saveAdvanceRideSchedule(false)" class="rounded-xl bg-merlinNavy text-white py-2 text-xs font-extrabold cursor-pointer">Save Ride Day Hours</button>
+              <button type="button" onclick="saveAdvanceRideSchedule(true)" class="rounded-xl bg-rose-100 text-rose-800 py-2 text-xs font-extrabold cursor-pointer">Ride Closed on Date</button>
+            </div>
+          </div>
+
+          <p id="adv-sched-feedback" class="hidden text-xs font-bold text-emerald-700"></p>
+          <div id="advance-schedules-list" class="space-y-1.5 pt-1"></div>
+        </div>
+
+        <!-- Single Attraction Editor (Name, Category, Land, Height, Queue, Status & Custom Tile Message) -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Edit Attraction, Category & Tile Message</h3>
+          <form onsubmit="saveQueueAndStatusOverride(event)" class="space-y-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Attraction</label>
+              <select id="qov-ride-select" onchange="loadRideOverrideIntoForm()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white"></select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Display Name</label>
+                <input id="qov-custom-name" type="text" placeholder="Attraction name" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Category</label>
+                <select id="qov-category-select" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                  <option value="Thrills">Thrills</option>
+                  <option value="Family">Family</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Themed Land</label>
+                <input id="qov-custom-land" type="text" placeholder="e.g. Shipwreck Coast" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Min Height</label>
+                <input id="qov-custom-height" type="text" placeholder="e.g. 1.2m" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Status Mode</label>
+                <select id="qov-delay-mode" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                  <option value="AUTO">Live / Queue</option>
+                  <option value="TEMPORARY_DELAY">Temporary Delay</option>
+                  <option value="CLOSED_OFFICIAL">Closed</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Queue (mins)</label>
+                <input id="qov-wait-input" type="number" min="0" max="300" placeholder="e.g. 15" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Custom Message Under Ride Name</label>
+              <input id="qov-status-text" type="text" placeholder="e.g. Closed Today or Single Rider Open" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+              <input id="qov-show-downtime" type="checkbox" class="h-4 w-4 rounded cursor-pointer" />
+              <span>Show downtime duration on ride tile</span>
+            </label>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button type="submit" class="rounded-xl resort-bg-primary resort-bg-primary-hover text-white py-2 text-xs font-extrabold cursor-pointer">Save Changes</button>
+              <button type="button" onclick="clearSelectedRideOverride()" class="rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 py-2 text-xs font-extrabold cursor-pointer">Clear Override</button>
+            </div>
+          </form>
+          <p id="qov-feedback" class="hidden text-xs font-bold text-emerald-700"></p>
+        </div>
+
+        <!-- Multi-Attraction Batch Editor (Category Move, Queue, Status & Message) -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Batch Edit Rides</h3>
+            <span id="batch-hours-count" class="rounded-full bg-merlinNavy/10 text-merlinNavy px-2.5 py-0.5 text-[10px] font-extrabold">0 selected</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="selectBatchRides('ALL')" class="rounded-lg bg-slate-100 hover:bg-slate-200 px-2.5 py-1 text-[10px] font-extrabold text-slate-800 cursor-pointer">All</button>
+            <button type="button" onclick="selectBatchRides('Thrills')" class="rounded-lg bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 text-[10px] font-extrabold text-emerald-900 cursor-pointer">Thrills</button>
+            <button type="button" onclick="selectBatchRides('Family')" class="rounded-lg bg-sky-50 hover:bg-sky-100 px-2.5 py-1 text-[10px] font-extrabold text-sky-900 cursor-pointer">Family</button>
+            <button type="button" onclick="selectBatchRides('NONE')" class="rounded-lg bg-slate-100 hover:bg-slate-200 px-2.5 py-1 text-[10px] font-extrabold text-slate-600 cursor-pointer">Clear</button>
+          </div>
+
+          <div id="batch-rides-checklist" class="max-h-44 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100 bg-slate-50/50"></div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="moveBatchRidesToCategory('Thrills')" class="rounded-xl bg-merlinNavy hover:opacity-95 text-white py-2 text-xs font-extrabold cursor-pointer">Move → Thrills</button>
+            <button type="button" onclick="moveBatchRidesToCategory('Family')" class="rounded-xl bg-slate-700 hover:bg-slate-800 text-white py-2 text-xs font-extrabold cursor-pointer">Move → Family</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Batch Status</label>
+              <select id="batch-ride-state" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                <option value="OPEN_QUEUE">Open / Queue</option>
+                <option value="CLOSED_OFFICIAL">Closed</option>
+                <option value="TEMPORARY_DELAY">Temporary Delay</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Queue (mins)</label>
+              <input id="batch-queue-wait" type="number" min="0" max="300" placeholder="Optional" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Batch Message Under Ride Name</label>
+            <input id="batch-tile-message" type="text" placeholder="e.g. Closed Today" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+          </div>
+
+          <button type="button" onclick="applyBatchQueueAndState()" class="w-full rounded-xl resort-bg-primary resort-bg-primary-hover text-white py-2 text-xs font-extrabold cursor-pointer">Apply Batch Status & Message</button>
+
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Ride Opens</label>
+              <input id="batch-ride-open" type="time" value="10:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Ride Closes</label>
+              <input id="batch-ride-close" type="time" value="17:00" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="applyBatchRideHours()" class="rounded-xl bg-merlinTeal hover:bg-merlinTealDark text-white py-2 text-xs font-extrabold cursor-pointer">Set Hours</button>
+            <button type="button" onclick="setSelectedRidesClosedHours()" class="rounded-xl bg-merlinCoral hover:brightness-95 text-white py-2 text-xs font-extrabold cursor-pointer">Set Closed</button>
+            <button type="button" onclick="clearBatchRideHours()" class="rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 py-2 text-xs font-extrabold cursor-pointer">Reset</button>
+          </div>
+          <p id="batch-hours-feedback" class="hidden text-xs font-bold text-emerald-700"></p>
+        </div>
+
+        <!-- Log Attraction Notice / Downtime -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Log Attraction Notice</h3>
+          <form onsubmit="submitDowntimeRecord(event)" class="space-y-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Attraction</label>
+              <select id="dt-ride-select" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Notice / Reason</label>
+              <input id="dt-reason-input" type="text" required placeholder="e.g. Delayed Opening or Maintenance" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+              <input id="dt-show-tile-checkbox" type="checkbox" class="h-4 w-4 rounded cursor-pointer" />
+              <span>Show duration badge on ride tile</span>
+            </label>
+            <button type="submit" class="w-full rounded-xl bg-merlinCoral hover:brightness-95 text-white py-2 text-xs font-extrabold cursor-pointer">Add Notice</button>
+          </form>
+        </div>
+
+        <!-- Add or Remove Attractions -->
+        <div class="rounded-2xl bg-white p-4 shadow-sm border border-slate-200 space-y-3">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-merlinNavy">Add or Remove Attractions</h3>
+          <form onsubmit="addCustomAttraction(event)" class="space-y-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input id="new-ride-name" type="text" required placeholder="New attraction name" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              <select id="new-ride-cat" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                <option value="Thrills">Thrills</option>
+                <option value="Family">Family</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="new-ride-land" type="text" placeholder="Themed land (optional)" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              <input id="new-ride-height" type="text" placeholder="Min height e.g. 1.0m" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+            <input id="new-ride-message" type="text" placeholder="Custom message under name (optional)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            <button type="submit" class="w-full rounded-xl resort-bg-primary resort-bg-primary-hover text-white py-2 text-xs font-extrabold cursor-pointer">Add Attraction</button>
+          </form>
+
+          <div class="pt-2 border-t border-slate-100 space-y-2">
+            <label class="block text-[11px] font-bold text-slate-600">Remove Attraction from List</label>
+            <div class="flex gap-2">
+              <select id="rem-ride-select" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white"></select>
+              <button type="button" onclick="removeSelectedAttraction()" class="rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 text-xs font-extrabold cursor-pointer">Remove</button>
+            </div>
+            <div id="removed-rides-container" class="space-y-1.5 pt-1"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       RIDE DETAIL MODAL
+       ========================================================= -->
+  <div id="ride-detail-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if(event.target===this)closeRideModal()">
+    <div id="ride-modal-content" class="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"></div>
+  </div>
+
+  <!-- =========================================================
+       BOTTOM NAVIGATION BAR (Explore, Queues, Info)
+       ========================================================= -->
+  <nav aria-label="Primary navigation" class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 shadow-[0_-2px_10px_rgba(15,23,42,0.06)]">
+    <div class="max-w-lg mx-auto grid grid-cols-3 h-16">
+      <button
+        type="button"
+        id="nav-btn-explore"
+        onclick="switchTab('explore')"
+        class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-slate-500 transition cursor-pointer"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+        </svg>
+        <span>Explore</span>
+      </button>
+
+      <button
+        type="button"
+        id="nav-btn-rides"
+        onclick="switchTab('rides')"
+        class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-extrabold resort-text-primary transition cursor-pointer"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 2h12" />
+          <path d="M6 22h12" />
+          <path d="M8 2v4a4 4 0 0 0 4 4 4 4 0 0 0-4 4v8" />
+          <path d="M16 2v4a4 4 0 0 1-4 4 4 4 0 0 1 4 4v8" />
+        </svg>
+        <span>Queues</span>
+      </button>
+
+      <button
+        type="button"
+        id="nav-btn-downtime"
+        onclick="switchTab('downtime')"
+        class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-slate-500 transition cursor-pointer"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <line x1="12" y1="16" x2="12" y2="11" />
+          <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+        </svg>
+        <span>Info</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    // =========================================================
+    // CONFIGURATION & CONSTANTS
+    // =========================================================
+    const FIREBASE_DB_URL = 'https://merlinqueues-default-rtdb.europe-west1.firebasedatabase.app';
+    const CLOUD_ROOT_STATE_URL = `${FIREBASE_DB_URL}/cwoaState.json`;
+    const REFRESH_INTERVAL_SEC = 58;
+    const CLOUD_POLL_INTERVAL_MS = 5000;
+    const ADMIN_PASSCODE = 'CWOA26';
+    const RIDE_CATEGORIES = ['Thrills', 'Family'];
+
+    function createResortBadgeSvg(label, bgHex, accentHex, glyph) {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+          <rect width="64" height="64" rx="14" fill="${bgHex}" />
+          <circle cx="32" cy="27" r="15" fill="${accentHex}" opacity="0.22" />
+          <text x="32" y="31" font-size="24" text-anchor="middle" dominant-baseline="middle">${glyph}</text>
+          <text x="32" y="53" font-size="8.5" font-weight="800" fill="#FFFFFF" text-anchor="middle" font-family="sans-serif">${label}</text>
+        </svg>
+      `;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    const RESORT_CONFIGS = {
+      chessington: {
+        key: 'chessington',
+        shortName: 'Chessington',
+        queuesTitle: 'Chessington Queues',
+        fullName: 'Chessington World of Adventures Resort',
+        subtitle: 'World of Adventures Resort',
+        heroHeading: 'Britain’s Wildest Adventure Awaits',
+        primaryColor: '#007A53',
+        primaryDark: '#005B3E',
+        mapGroundBg: '#ECFDF5',
+        mapIslandFill: '#A7F3D0',
+        entityId: 'ae959d1f-9fcc-4aab-8063-71e641fa57f4',
+        logoUri: createResortBadgeSvg('CWOA', '#007A53', '#F5B82E', '🦁'),
+        zones: [
+          { id: 'all', label: 'All Resort', x: 0.50, y: 0.48, zoom: 1.0 },
+          { id: 'jumanji', label: 'World of Jumanji', x: 0.58, y: 0.70, zoom: 1.65 },
+          { id: 'forbidden', label: 'Forbidden Kingdom', x: 0.42, y: 0.62, zoom: 1.65 },
+          { id: 'shipwreck', label: 'Shipwreck Coast', x: 0.70, y: 0.36, zoom: 1.65 },
+          { id: 'wildwoods', label: 'Wild Woods', x: 0.26, y: 0.32, zoom: 1.65 },
+          { id: 'zufari', label: 'Zufari & Zoo', x: 0.76, y: 0.64, zoom: 1.65 }
+        ],
+        defaultRides: [
+          // Thrills
+          { id: 'cw-blue-barnacle', name: 'Blue Barnacle', category: 'Thrills', land: 'Shipwreck Coast', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.72, y: 0.36 },
+          { id: 'cw-croc-drop', name: 'CrocDrop', category: 'Thrills', land: 'Forbidden Kingdom', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.44, y: 0.62 },
+          { id: 'cw-dragons-fury', name: "Dragon's Fury", category: 'Thrills', land: 'Land of the Dragons', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.30, y: 0.42 },
+          { id: 'cw-mamba-strike', name: 'Mamba Strike', category: 'Thrills', land: 'World of Jumanji', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.56, y: 0.72 },
+          { id: 'cw-mandrill-mayhem', name: 'Mandrill Mayhem', category: 'Thrills', land: 'World of Jumanji', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.60, y: 0.68 },
+          { id: 'cw-ostrich-stampede', name: 'Ostrich Stampede', category: 'Thrills', land: 'World of Jumanji', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.53, y: 0.75 },
+          { id: 'cw-rattlesnake', name: 'Rattlesnake', category: 'Thrills', land: 'Forbidden Kingdom', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.40, y: 0.66 },
+          { id: 'cw-seastorm', name: 'Seastorm', category: 'Thrills', land: 'Shipwreck Coast', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.68, y: 0.32 },
+          { id: 'cw-tiger-rock', name: 'Tiger Rock', category: 'Thrills', land: 'Land of the Tiger', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.32, y: 0.54 },
+          { id: 'cw-vampire', name: 'Vampire', category: 'Thrills', land: 'Wild Woods', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.24, y: 0.32 },
+
+          // Family
+          { id: 'cw-adventure-tree-carousel', name: 'Adventure Tree Carousel', category: 'Family', land: 'Adventure Point', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.48, y: 0.34 },
+          { id: 'cw-barrel-bail-out', name: 'Barrel Bail Out!', category: 'Family', land: 'Shipwreck Coast', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.75, y: 0.40 },
+          { id: 'cw-canopy-capers', name: 'Canopy Capers', category: 'Family', land: 'Wild Woods', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.28, y: 0.28 },
+          { id: 'cw-chases-mountain-mission', name: "Chase’s Mountain Mission", category: 'Family', land: 'World of Paw Patrol', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.52, y: 0.24 },
+          { id: 'cw-dragons-playhouse', name: "Dragon's Playhouse", category: 'Family', land: 'Land of the Dragons', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.34, y: 0.46 },
+          { id: 'cw-elmers-flying-jumbos', name: "Elmer's Flying Jumbos", category: 'Family', land: 'Adventure Point', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.44, y: 0.44 },
+          { id: 'cw-griffins-galleon', name: 'Griffins Galleon', category: 'Family', land: 'Land of the Dragons', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.46, y: 0.50 },
+          { id: 'cw-jungle-rangers', name: 'Jungle Rangers', category: 'Family', land: 'Land of the Tiger', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.36, y: 0.58 },
+          { id: 'cw-marshalls-firetruck-rescue', name: "Marshall's Firetruck Rescue", category: 'Family', land: 'World of Paw Patrol', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.55, y: 0.27 },
+          { id: 'cw-river-rafts', name: 'River Rafts', category: 'Family', land: 'Pirates Cove', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.62, y: 0.48 },
+          { id: 'cw-room-on-the-broom', name: 'Room on The Broom - A Magical Journey', category: 'Family', land: 'Zufari & Zoo', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.22, y: 0.40 },
+          { id: 'cw-sea-dragons', name: 'Sea Dragons', category: 'Family', land: 'Shipwreck Coast', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.65, y: 0.38 },
+          { id: 'cw-skyes-helicopter-heroes', name: "Skye's Helicopter Heroes", category: 'Family', land: 'World of Paw Patrol', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.49, y: 0.27 },
+          { id: 'cw-gruffalo-river-ride', name: 'The Gruffalo River Ride Adventure', category: 'Family', land: 'Wild Woods', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.26, y: 0.36 },
+          { id: 'cw-tiny-truckers', name: 'Tiny Truckers', category: 'Family', land: 'Adventure Point', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.50, y: 0.42 },
+          { id: 'cw-tomb-blaster', name: 'Tomb Blaster', category: 'Family', land: 'Forbidden Kingdom', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.42, y: 0.60 },
+          { id: 'cw-trawler-trouble', name: 'Trawler Trouble', category: 'Family', land: 'Shipwreck Coast', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.70, y: 0.44 },
+          { id: 'cw-treetop-hoppers', name: 'Treetop Hoppers', category: 'Family', land: 'Wild Woods', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.30, y: 0.24 },
+          { id: 'cw-zufari', name: 'ZUFARI: Ride into Africa', category: 'Family', land: 'Zufari & Zoo', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.76, y: 0.64 },
+          { id: 'cw-zumas-hovercraft', name: "Zuma's Hovercraft Adventure", category: 'Family', land: 'World of Paw Patrol', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.58, y: 0.24 }
+        ]
+      },
+
+      legoland: {
+        key: 'legoland',
+        shortName: 'LEGOLAND',
+        queuesTitle: 'LEGOLAND Queues',
+        fullName: 'LEGOLAND Windsor Resort',
+        subtitle: 'Theme Park, Miniland & Live Wait Times',
+        heroHeading: 'Build Your Adventure at LEGOLAND Windsor',
+        primaryColor: '#007A53',
+        primaryDark: '#005B3E',
+        mapGroundBg: '#FEF9C3',
+        mapIslandFill: '#FDE68A',
+        entityId: 'a4f71074-e616-4de4-9278-72fdecbdc995',
+        logoUri: createResortBadgeSvg('LEGO', '#D9232E', '#F5B82E', '🧱'),
+        zones: [
+          { id: 'all', label: 'All Resort', x: 0.50, y: 0.48, zoom: 1.0 },
+          { id: 'mythica', label: 'LEGO MYTHICA', x: 0.66, y: 0.36, zoom: 1.65 },
+          { id: 'knights', label: "Knights' Kingdom", x: 0.34, y: 0.62, zoom: 1.65 },
+          { id: 'ninjago', label: 'LEGO NINJAGO World', x: 0.52, y: 0.64, zoom: 1.65 },
+          { id: 'pirates', label: 'Pirate Shores', x: 0.28, y: 0.40, zoom: 1.65 },
+          { id: 'city', label: 'LEGO City & Miniland', x: 0.50, y: 0.32, zoom: 1.65 }
+        ],
+        defaultRides: [
+          { id: 'll-flight-sky-lion', name: 'Flight of the Sky Lion', category: 'Thrills', land: 'LEGO MYTHICA', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.68, y: 0.34 },
+          { id: 'll-the-dragon', name: 'The Dragon', category: 'Thrills', land: "Knights' Kingdom", minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.34, y: 0.62 },
+          { id: 'll-minifigure-speedway', name: 'Minifigure Speedway', category: 'Thrills', land: 'LEGO City', minHeight: '1.05m', rawStatus: 'CLOSED', waitTime: null, x: 0.52, y: 0.28 },
+          { id: 'll-hydra-challenge', name: "Hydra's Challenge", category: 'Thrills', land: 'LEGO MYTHICA', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.62, y: 0.40 },
+          { id: 'll-pirate-falls', name: 'Pirate Falls: Treasure Quest', category: 'Thrills', land: 'Pirate Shores', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.28, y: 0.42 },
+          { id: 'll-viking-river-splash', name: 'Viking River Splash', category: 'Thrills', land: 'Land of the Vikings', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.72, y: 0.58 },
+          { id: 'll-fire-ice-freefall', name: 'Fire & Ice Freefall', category: 'Thrills', land: 'LEGO MYTHICA', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.65, y: 0.30 },
+
+          { id: 'll-ninjago-the-ride', name: 'LEGO NINJAGO The Ride', category: 'Family', land: 'LEGO NINJAGO World', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.52, y: 0.64 },
+          { id: 'll-driving-school', name: 'LEGO City Driving School', category: 'Family', land: 'LEGO City', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.46, y: 0.34 },
+          { id: 'll-coastguard-hq', name: 'Coastguard HQ', category: 'Family', land: 'LEGO City', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.44, y: 0.42 },
+          { id: 'll-laser-raiders', name: 'Laser Raiders', category: 'Family', land: 'Kingdom of the Pharaohs', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.58, y: 0.52 },
+          { id: 'll-jolly-rocker', name: 'Jolly Rocker', category: 'Family', land: 'Pirate Shores', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.26, y: 0.36 },
+          { id: 'll-dragons-apprentice', name: "Dragon's Apprentice", category: 'Family', land: "Knights' Kingdom", minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.38, y: 0.58 },
+          { id: 'll-destinys-bounty', name: "Destiny's Bounty", category: 'Family', land: 'LEGO NINJAGO World', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.55, y: 0.68 },
+          { id: 'll-duplo-dino-coaster', name: 'DUPLO Dino Coaster', category: 'Family', land: 'DUPLO Valley', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.36, y: 0.28 },
+          { id: 'll-fairy-tale-brook', name: 'Fairy Tale Brook', category: 'Family', land: 'DUPLO Valley', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.40, y: 0.25 },
+          { id: 'll-atlantis-submarine', name: 'LEGO City Deep Sea Adventure', category: 'Family', land: 'LEGO City', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.50, y: 0.38 },
+          { id: 'll-spinning-spider', name: 'Spinning Spider', category: 'Family', land: 'Land of the Vikings', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.70, y: 0.52 }
+        ]
+      },
+
+      thorpe: {
+        key: 'thorpe',
+        shortName: 'Thorpe Park',
+        queuesTitle: 'Thorpe Park Queues',
+        fullName: 'Thorpe Park Resort',
+        subtitle: 'The UK’s Most Thrilling Theme Park',
+        heroHeading: 'Unleash Maximum Thrills at Thorpe Park',
+        primaryColor: '#007A53',
+        primaryDark: '#005B3E',
+        mapGroundBg: '#EFF6FF',
+        mapIslandFill: '#DBEAFE',
+        entityId: '18836350-90b5-4703-99e0-60d156d02509',
+        logoUri: createResortBadgeSvg('THORPE', '#1B244B', '#F5B82E', '⚡'),
+        zones: [
+          { id: 'all', label: 'All Resort', x: 0.50, y: 0.48, zoom: 1.0 },
+          { id: 'hyperia', label: 'Fearless Valley (Hyperia)', x: 0.72, y: 0.32, zoom: 1.65 },
+          { id: 'swarm', label: 'The Swarm Island', x: 0.26, y: 0.34, zoom: 1.65 },
+          { id: 'saw', label: 'Old Town (SAW)', x: 0.66, y: 0.64, zoom: 1.65 },
+          { id: 'stealth', label: 'Amity (Stealth & Tidal Wave)', x: 0.46, y: 0.36, zoom: 1.65 },
+          { id: 'nemesis', label: 'Lost City (Nemesis Inferno)', x: 0.34, y: 0.62, zoom: 1.65 }
+        ],
+        defaultRides: [
+          { id: 'tp-hyperia', name: 'Hyperia', category: 'Thrills', land: 'Fearless Valley', minHeight: '1.3m', rawStatus: 'CLOSED', waitTime: null, x: 0.72, y: 0.32 },
+          { id: 'tp-stealth', name: 'Stealth', category: 'Thrills', land: 'Amity', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.46, y: 0.34 },
+          { id: 'tp-the-swarm', name: 'The Swarm', category: 'Thrills', land: 'The Swarm Island', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.26, y: 0.34 },
+          { id: 'tp-nemesis-inferno', name: 'Nemesis Inferno', category: 'Thrills', land: 'Lost City', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.34, y: 0.62 },
+          { id: 'tp-saw-the-ride', name: 'SAW - The Ride', category: 'Thrills', land: 'Old Town', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.66, y: 0.64 },
+          { id: 'tp-colossus', name: 'Colossus', category: 'Thrills', land: 'Lost City', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.44, y: 0.68 },
+          { id: 'tp-walking-dead', name: 'The Walking Dead: The Ride', category: 'Thrills', land: 'The Dock Yard', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.52, y: 0.50 },
+          { id: 'tp-ghost-train', name: 'Ghost Train', category: 'Thrills', land: 'The Dock Yard', minHeight: '1.3m', rawStatus: 'CLOSED', waitTime: null, x: 0.56, y: 0.46 },
+          { id: 'tp-tidal-wave', name: 'Tidal Wave', category: 'Thrills', land: 'Amity', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.42, y: 0.42 },
+          { id: 'tp-detonator', name: 'Detonator', category: 'Thrills', land: 'Lost City', minHeight: '1.3m', rawStatus: 'CLOSED', waitTime: null, x: 0.38, y: 0.56 },
+          { id: 'tp-samurai', name: 'Samurai', category: 'Thrills', land: 'Old Town', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.62, y: 0.58 },
+          { id: 'tp-rush', name: 'Rush', category: 'Thrills', land: 'Lost City', minHeight: '1.3m', rawStatus: 'CLOSED', waitTime: null, x: 0.30, y: 0.54 },
+          { id: 'tp-vortex', name: 'Vortex', category: 'Thrills', land: 'Lost City', minHeight: '1.4m', rawStatus: 'CLOSED', waitTime: null, x: 0.40, y: 0.64 },
+          { id: 'tp-quantum', name: 'Quantum', category: 'Thrills', land: 'Lost City', minHeight: '1.2m', rawStatus: 'CLOSED', waitTime: null, x: 0.48, y: 0.60 },
+
+          { id: 'tp-flying-fish', name: 'Flying Fish', category: 'Family', land: 'Amity', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.50, y: 0.38 },
+          { id: 'tp-storm-surge', name: 'Storm Surge', category: 'Family', land: 'Amity', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.48, y: 0.44 },
+          { id: 'tp-rumba-rapids', name: 'Rumba Rapids', category: 'Family', land: 'Jungle', minHeight: '1.1m', rawStatus: 'CLOSED', waitTime: null, x: 0.60, y: 0.40 },
+          { id: 'tp-depth-charge', name: 'Depth Charge', category: 'Family', land: 'Amity', minHeight: '1.0m', rawStatus: 'CLOSED', waitTime: null, x: 0.44, y: 0.36 },
+          { id: 'tp-mr-monkeys-banana', name: "Mr Monkey's Banana Ride", category: 'Family', land: 'Jungle', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.58, y: 0.35 },
+          { id: 'tp-dobble-tea-party', name: 'Dobble Tea Party', category: 'Family', land: 'The Dock Yard', minHeight: '0.9m', rawStatus: 'CLOSED', waitTime: null, x: 0.54, y: 0.54 }
+        ]
+      }
+    };
+
+    // =========================================================
+    // DATE & BUCKET HELPERS (ROOT = CHESSINGTON, RESORTS = LEGOLAND/THORPE)
+    // =========================================================
+    function getTodayDateKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatDisplayDate(dateStr) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr || ''));
+      if (!m) return dateStr;
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function createEmptyBucket(isRootChessington = false) {
+      return {
+        updatedAt: 0,
+        downtimeRecords: [],
+        rideOverrides: isRootChessington
+          ? {
+              'cw-blue-barnacle': { customStatus: 'Closed Today' },
+              'cw-rattlesnake': { customStatus: 'Closed Today' }
+            }
+          : {},
+        customRides: [],
+        removedIds: [],
+        downSinceMap: {},
+        tileSettings: {
+          globalShowDowntimeOnTiles: false,
+          forceDowntimeAfterClose: false,
+          showUpcomingParkHours: false,
+          showUpcomingRideHours: false
+        },
+        features: {
+          mapEnabled: true,
+          queuesEnabled: true,
+          searchEnabled: false,
+          statsEnabled: true,
+          downtimeLogEnabled: true
+        },
+        parkHours: {
+          isClosed: false,
+          open: '10:00',
+          close: '17:00',
+          eventLabel: 'Open Today'
+        },
+        advanceSchedules: {}
+      };
+    }
+
+    function normalizeBucket(raw, isRootChessington = false) {
+      const base = createEmptyBucket(isRootChessington);
+      if (!raw || typeof raw !== 'object') return base;
+      return {
+        ...base,
+        ...raw,
+        updatedAt: Number(raw.updatedAt || 0),
+        downtimeRecords: Array.isArray(raw.downtimeRecords) ? raw.downtimeRecords : [],
+        rideOverrides: raw.rideOverrides && typeof raw.rideOverrides === 'object' ? raw.rideOverrides : {},
+        customRides: Array.isArray(raw.customRides) ? raw.customRides : [],
+        removedIds: Array.isArray(raw.removedIds) ? raw.removedIds : [],
+        downSinceMap: raw.downSinceMap && typeof raw.downSinceMap === 'object' ? raw.downSinceMap : {},
+        tileSettings: { ...base.tileSettings, ...(raw.tileSettings || {}) },
+        features: { ...base.features, ...(raw.features || {}) },
+        parkHours: { ...base.parkHours, ...(raw.parkHours || {}) },
+        advanceSchedules: raw.advanceSchedules && typeof raw.advanceSchedules === 'object' ? raw.advanceSchedules : {}
+      };
+    }
+
+    function loadInitialState() {
+      let parsedLocal = null;
+      try {
+        const raw = localStorage.getItem('cwoa_root_state_v9');
+        if (raw) parsedLocal = JSON.parse(raw);
+      } catch {}
+
+      const chessBucket = normalizeBucket(parsedLocal, true);
+      const resortsMap = (parsedLocal && parsedLocal.resorts && typeof parsedLocal.resorts === 'object') ? parsedLocal.resorts : {};
+
+      return {
+        activeResort: (parsedLocal && parsedLocal.activeResort && RESORT_CONFIGS[parsedLocal.activeResort])
+          ? parsedLocal.activeResort
+          : 'chessington',
+        activeTab: 'rides',
+        activeRideCategory: 'Thrills',
+        guestHoursDate: getTodayDateKey(),
+        apiRidesByResort: { chessington: [], legoland: [], thorpe: [] },
+        buckets: {
+          chessington: chessBucket,
+          legoland: normalizeBucket(resortsMap.legoland, false),
+          thorpe: normalizeBucket(resortsMap.thorpe, false)
+        },
+        batchSelectedRideIds: [],
+        activeZoneId: 'all',
+        countdown: REFRESH_INTERVAL_SEC,
+        adminUnlocked: false,
+        cloudStatusText: 'Cloud RTDB: Connecting...',
+        mapZoom: 1,
+        mapPanX: 0,
+        mapPanY: 0,
+        selectedMapRideId: null
+      };
+    }
+
+    const state = loadInitialState();
+
+    function getCurrentConfig() {
+      return RESORT_CONFIGS[state.activeResort] || RESORT_CONFIGS.chessington;
+    }
+
+    function getCurrentBucket() {
+      return state.buckets[state.activeResort];
+    }
+
+    function buildUnifiedCloudDocument() {
+      const cw = state.buckets.chessington;
+      const ll = state.buckets.legoland;
+      const tp = state.buckets.thorpe;
+      const maxTs = Math.max(
+        Number(cw.updatedAt || 0),
+        Number(ll.updatedAt || 0),
+        Number(tp.updatedAt || 0)
+      );
+
+      return {
+        updatedAt: maxTs || Date.now(),
+        activeResort: state.activeResort,
+        downtimeRecords: cw.downtimeRecords,
+        rideOverrides: cw.rideOverrides,
+        customRides: cw.customRides,
+        removedIds: cw.removedIds,
+        downSinceMap: cw.downSinceMap,
+        tileSettings: cw.tileSettings,
+        features: cw.features,
+        parkHours: cw.parkHours,
+        advanceSchedules: cw.advanceSchedules,
+        resorts: {
+          legoland: ll,
+          thorpe: tp
+        }
+      };
+    }
+
+    function saveLocalUnifiedDoc() {
+      try {
+        localStorage.setItem('cwoa_root_state_v9', JSON.stringify(buildUnifiedCloudDocument()));
+      } catch {}
+    }
+
+    // =========================================================
+    // FIREBASE REALTIME DATABASE SYNC (/cwoaState.json)
+    // =========================================================
+    function updateCloudBadgeUi(text) {
+      state.cloudStatusText = text;
+      setText('cloud-sync-status-label', text);
+    }
+
+    async function pushCloudState() {
+      const nowTs = Date.now();
+      getCurrentBucket().updatedAt = nowTs;
+      saveLocalUnifiedDoc();
+
+      try {
+        const res = await fetch(CLOUD_ROOT_STATE_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildUnifiedCloudDocument())
+        });
+        if (res.ok) {
+          const timeStr = new Date(nowTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          updateCloudBadgeUi(`Cloud RTDB (/cwoaState.json): Synced ${timeStr}`);
+          return true;
+        }
+        updateCloudBadgeUi(`Cloud RTDB Error (${res.status}) — Check RTDB Rules`);
+        return false;
+      } catch {
+        updateCloudBadgeUi('Cloud RTDB: Offline / Retrying...');
+        return false;
+      }
+    }
+
+    async function pullCloudState(forceApply = false) {
+      try {
+        const res = await fetch(`${CLOUD_ROOT_STATE_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (!data || typeof data !== 'object') {
+          updateCloudBadgeUi('Cloud RTDB (/cwoaState.json): Connected');
+          return false;
+        }
+
+        const remoteTs = Number(data.updatedAt || 0);
+        const localMaxTs = Math.max(
+          Number(state.buckets.chessington.updatedAt || 0),
+          Number(state.buckets.legoland.updatedAt || 0),
+          Number(state.buckets.thorpe.updatedAt || 0)
+        );
+
+        if (!forceApply && remoteTs <= localMaxTs) {
+          updateCloudBadgeUi('Cloud RTDB (/cwoaState.json): Up to date');
+          return false;
+        }
+
+        state.buckets.chessington = normalizeBucket(data, true);
+        const resortsObj = (data.resorts && typeof data.resorts === 'object') ? data.resorts : {};
+        state.buckets.legoland = normalizeBucket(resortsObj.legoland, false);
+        state.buckets.thorpe = normalizeBucket(resortsObj.thorpe, false);
+
+        if (data.activeResort && RESORT_CONFIGS[data.activeResort] && !state._userSwitchedResort) {
+          state.activeResort = data.activeResort;
+        }
+
+        saveLocalUnifiedDoc();
+        const timeStr = remoteTs ? new Date(remoteTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Now';
+        updateCloudBadgeUi(`Cloud RTDB (/cwoaState.json): Pulled ${timeStr}`);
+
+        if (state.adminUnlocked) {
+          syncAdminControlsFromState();
+        }
+        renderAll();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function persistAll(syncCloud = true) {
+      saveLocalUnifiedDoc();
+      if (syncCloud) {
+        pushCloudState();
+      }
+    }
+
+    async function forcePushCloudNow() {
+      updateCloudBadgeUi('Cloud RTDB: Pushing...');
+      await pushCloudState();
+    }
+
+    async function forcePullCloudNow() {
+      updateCloudBadgeUi('Cloud RTDB: Pulling...');
+      await pullCloudState(true);
+    }
+
+    // =========================================================
+    // RESORT SWITCHING & BRANDING
+    // =========================================================
+    function switchResort(resortKey) {
+      if (!RESORT_CONFIGS[resortKey]) return;
+      state._userSwitchedResort = true;
+      state.activeResort = resortKey;
+      state.batchSelectedRideIds = [];
+      state.activeZoneId = 'all';
+      state.selectedMapRideId = null;
+      closeMapPinCard();
+      resetMapView();
+
+      applyResortBranding();
+      if (state.adminUnlocked) {
+        syncAdminControlsFromState();
+      }
+      renderAll();
+      saveLocalUnifiedDoc();
+      fetchLiveParkData(resortKey);
+    }
+
+    function applyResortBranding() {
+      const cfg = getCurrentConfig();
+      const root = document.documentElement;
+      root.style.setProperty('--resort-primary', cfg.primaryColor);
+      root.style.setProperty('--resort-primary-dark', cfg.primaryDark);
+
+      setText('header-resort-title', cfg.queuesTitle);
+      setText('header-resort-subtitle', cfg.subtitle);
+      setText('explore-hero-heading', cfg.heroHeading);
+      setText('queues-resort-name-label', cfg.queuesTitle);
+      setText('map-heading-title', `${cfg.shortName} Map`);
+      setText('avail-resort-subtitle', `Live operating percentage across ${cfg.shortName}`);
+      setText('admin-active-resort-banner', `Unlocked • ${cfg.shortName}`);
+
+      const heroImg = document.getElementById('hero-entrance-img');
+      if (heroImg) {
+        heroImg.src = makeRideArtworkSvg(cfg.shortName, 'Family');
+      }
+
+      document.querySelectorAll('img[data-role="logo"]').forEach(img => {
+        img.src = cfg.logoUri;
+      });
+
+      for (const key of Object.keys(RESORT_CONFIGS)) {
+        const isSelected = key === state.activeResort;
+        for (const prefix of ['resort-pill-', 'q-resort-pill-']) {
+          const btn = document.getElementById(`${prefix}${key}`);
+          if (!btn) continue;
+          btn.classList.toggle('bg-white', isSelected);
+          btn.classList.toggle('text-merlinNavy', isSelected);
+          btn.classList.toggle('shadow-xs', isSelected);
+          btn.classList.toggle('text-white/90', !isSelected);
+          btn.classList.toggle('hover:text-white', !isSelected);
+        }
+      }
+    }
+
+    // =========================================================
+    // FORMATTING, ESCAPING & ADVANCE OPERATING HOURS HELPERS
+    // =========================================================
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(str) {
+      return String(str ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function setText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(val);
+    }
+
+    function syncSearchInputs(val) {
+      const a = document.getElementById('ride-search-input');
+      const b = document.getElementById('queues-inline-search');
+      if (a && a.value !== val) a.value = val;
+      if (b && b.value !== val) b.value = val;
+      renderRidesList();
+    }
+
+    function formatMinutesDuration(ms) {
+      const totalMins = Math.max(1, Math.round(ms / 60000));
+      if (totalMins < 60) {
+        return `${totalMins} ${totalMins === 1 ? 'min' : 'mins'}`;
+      }
+      const hrs = Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      return mins > 0 ? `${hrs}h ${mins}m` : `${hrs} ${hrs === 1 ? 'hr' : 'hrs'}`;
+    }
+
+    function formatHoursRange(openStr, closeStr) {
+      const o = (openStr || '').trim();
+      const c = (closeStr || '').trim();
+      if (!o || !c) return '';
+      return `${o} – ${c}`;
+    }
+
+    function getParkHoursForDate(dateKey = getTodayDateKey()) {
+      const bucket = getCurrentBucket();
+      const adv = bucket.advanceSchedules && bucket.advanceSchedules[dateKey];
+      if (adv && adv.park) {
+        return {
+          isClosed: Boolean(adv.park.isClosed),
+          open: adv.park.open || bucket.parkHours.open || '10:00',
+          close: adv.park.close || bucket.parkHours.close || '17:00',
+          eventLabel: adv.park.eventLabel || ''
+        };
+      }
+      return {
+        isClosed: Boolean(bucket.parkHours && bucket.parkHours.isClosed),
+        open: (bucket.parkHours && bucket.parkHours.open) || '10:00',
+        close: (bucket.parkHours && bucket.parkHours.close) || '17:00',
+        eventLabel: (bucket.parkHours && bucket.parkHours.eventLabel) || ''
+      };
+    }
+
+    function getRideHoursForDate(rideId, dateKey = getTodayDateKey()) {
+      const bucket = getCurrentBucket();
+      const parkForDate = getParkHoursForDate(dateKey);
+      if (parkForDate.isClosed) {
+        return { isClosed: true, text: 'Closed', isCustom: false };
+      }
+
+      const adv = bucket.advanceSchedules && bucket.advanceSchedules[dateKey];
+      const advRide = adv && adv.rides && adv.rides[rideId];
+      if (advRide) {
+        if (advRide.isClosed) return { isClosed: true, text: 'Closed', isCustom: true };
+        if (advRide.open && advRide.close) {
+          return { isClosed: false, text: formatHoursRange(advRide.open, advRide.close), isCustom: true, close: advRide.close };
+        }
+      }
+
+      const ov = (rideId && bucket.rideOverrides[rideId]) || {};
+      if (ov.hoursClosed) return { isClosed: true, text: 'Closed', isCustom: true };
+      if (ov.openTime && ov.closeTime) {
+        return { isClosed: false, text: formatHoursRange(ov.openTime, ov.closeTime), isCustom: true, close: ov.closeTime };
+      }
+
+      return {
+        isClosed: false,
+        text: formatHoursRange(parkForDate.open, parkForDate.close),
+        isCustom: false,
+        close: parkForDate.close
+      };
+    }
+
+    function getEffectiveParkHoursText() {
+      const ph = getParkHoursForDate(getTodayDateKey());
+      if (ph.isClosed) return 'Closed';
+      return formatHoursRange(ph.open, ph.close);
+    }
+
+    function parseTimeToTodayMs(timeStr, baseDateMs = Date.now()) {
+      const m = /^(\d{1,2}):(\d{2})$/.exec(String(timeStr || '').trim());
+      if (!m) return null;
+      const d = new Date(baseDateMs);
+      d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+      return d.getTime();
+    }
+
+    function isRideScheduledClosed(rideOrId) {
+      const id = typeof rideOrId === 'string' ? rideOrId : (rideOrId && rideOrId.id);
+      return getRideHoursForDate(id, getTodayDateKey()).isClosed;
+    }
+
+    function getRideClosingMs(rideOrId, nowMs = Date.now()) {
+      const id = typeof rideOrId === 'string' ? rideOrId : (rideOrId && rideOrId.id);
+      const info = getRideHoursForDate(id, getTodayDateKey());
+      return parseTimeToTodayMs(info.close || '17:00', nowMs);
+    }
+
+    function isPastRideClosing(rideOrId, nowMs = Date.now()) {
+      const bucket = getCurrentBucket();
+      if (isRideScheduledClosed(rideOrId)) return true;
+      if (bucket.tileSettings && bucket.tileSettings.forceDowntimeAfterClose) return false;
+      const closeMs = getRideClosingMs(rideOrId, nowMs);
+      if (typeof closeMs !== 'number') return false;
+      return nowMs >= closeMs;
+    }
+
+    function handleGuestHoursDateChange(dateVal) {
+      state.guestHoursDate = dateVal || getTodayDateKey();
+      renderParkHoursDisplays();
+    }
+
+    function resetGuestHoursDateToToday() {
+      state.guestHoursDate = getTodayDateKey();
+      const picker = document.getElementById('guest-hours-date-picker');
+      if (picker) picker.value = state.guestHoursDate;
+      renderParkHoursDisplays();
+    }
+
+    function renderParkHoursDisplays() {
+      const bucket = getCurrentBucket();
+      const todayKey = getTodayDateKey();
+      const viewDate = state.guestHoursDate || todayKey;
+      const showUpcomingPark = Boolean(bucket.tileSettings && bucket.tileSettings.showUpcomingParkHours);
+
+      const upcomingSection = document.getElementById('guest-upcoming-park-hours-section');
+      if (upcomingSection) {
+        upcomingSection.classList.toggle('hidden', !showUpcomingPark);
+      }
+
+      const picker = document.getElementById('guest-hours-date-picker');
+      const todayBtn = document.getElementById('guest-hours-today-btn');
+      if (picker && !picker.value) picker.value = viewDate;
+      if (todayBtn) todayBtn.classList.toggle('hidden', viewDate === todayKey);
+
+      const ph = getParkHoursForDate(viewDate);
+      const rangeText = ph.isClosed ? 'Closed' : formatHoursRange(ph.open, ph.close);
+      const eventText = ph.isClosed
+        ? 'Park Closed'
+        : ((ph.eventLabel || '').trim() || (viewDate === todayKey ? 'Open Today' : 'Scheduled'));
+
+      setText(
+        'explore-park-hours-caption',
+        viewDate === todayKey ? 'Park Opening Hours (Today)' : `Park Opening Hours (${formatDisplayDate(viewDate)})`
+      );
+      setText('explore-park-hours-text', rangeText);
+      setText('explore-park-event-badge', eventText);
+
+      const datesBox = document.getElementById('guest-upcoming-park-dates-list');
+      if (datesBox && showUpcomingPark) {
+        const upcomingDates = Object.keys(bucket.advanceSchedules || {})
+          .filter(d => d >= todayKey)
+          .sort()
+          .slice(0, 5);
+
+        if (upcomingDates.length === 0) {
+          datesBox.innerHTML = `<div class="text-[11px] text-slate-400">No upcoming scheduled dates published yet.</div>`;
+        } else {
+          datesBox.innerHTML = upcomingDates.map(d => {
+            const info = getParkHoursForDate(d);
+            const txt = info.isClosed ? 'Closed' : formatHoursRange(info.open, info.close);
+            return `
+              <div class="flex items-center justify-between rounded-lg bg-slate-50 px-2.5 py-1.5 text-[11px] font-bold">
+                <span class="text-slate-700">${escapeHtml(formatDisplayDate(d))}${info.eventLabel ? ` • ${escapeHtml(info.eventLabel)}` : ''}</span>
+                <span class="${info.isClosed ? 'text-merlinCoral' : 'text-merlinNavy'} tabular-nums">${escapeHtml(txt)}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    // =========================================================
+    // FEATURE AVAILABILITY CONTROLS
+    // =========================================================
+    function applyFeatureAvailabilityUi() {
+      const features = getCurrentBucket().features;
+      const mapEnabled = features.mapEnabled !== false;
+      const queuesEnabled = features.queuesEnabled !== false;
+      const searchEnabled = features.searchEnabled === true;
+      const statsEnabled = features.statsEnabled !== false;
+      const downtimeEnabled = features.downtimeLogEnabled !== false;
+
+      const mapNavBtn = document.getElementById('nav-btn-map');
+      if (mapNavBtn) mapNavBtn.classList.toggle('hidden', !mapEnabled);
+
+      const exploreMapCard = document.getElementById('explore-map-card');
+      if (exploreMapCard) exploreMapCard.classList.toggle('hidden', !mapEnabled);
+
+      const mapUnavail = document.getElementById('map-unavailable-banner');
+      const mapWork = document.getElementById('map-active-workspace');
+      if (mapUnavail) mapUnavail.classList.toggle('hidden', mapEnabled);
+      if (mapWork) mapWork.classList.toggle('hidden', !mapEnabled);
+
+      if (!mapEnabled && state.activeTab === 'map') {
+        switchTab('explore');
+        return;
+      }
+
+      const searchWrap = document.getElementById('search-bar-wrapper');
+      const queuesSearchRow = document.getElementById('queues-search-row');
+      if (searchWrap) searchWrap.classList.toggle('hidden', !searchEnabled);
+      if (queuesSearchRow) queuesSearchRow.classList.toggle('hidden', !searchEnabled);
+
+      const statsStrip = document.getElementById('explore-stats-strip');
+      if (statsStrip) statsStrip.classList.toggle('hidden', !statsEnabled);
+
+      const dtUnavail = document.getElementById('downtime-unavailable-banner');
+      const dtSections = document.getElementById('downtime-content-sections');
+      if (dtUnavail) dtUnavail.classList.toggle('hidden', downtimeEnabled);
+      if (dtSections) dtSections.classList.toggle('hidden', !downtimeEnabled);
+
+      const ridesListEl = document.getElementById('rides-list-container');
+      if (ridesListEl && !queuesEnabled) {
+        ridesListEl.innerHTML = `
+          <div class="p-6 text-center space-y-1 bg-amber-50">
+            <div class="text-xs font-extrabold text-amber-950">Live Queues Temporarily Unavailable</div>
+            <p class="text-[11px] text-amber-900">This feature is currently unavailable.</p>
+          </div>
+        `;
+      }
+    }
+
+    function toggleFeatureAvailability(key, enabled) {
+      getCurrentBucket().features[key] = Boolean(enabled);
+      persistAll(true);
+      applyFeatureAvailabilityUi();
+      renderAll();
+    }
+
+    function toggleUpcomingDisplaySetting(key, enabled) {
+      getCurrentBucket().tileSettings[key] = Boolean(enabled);
+      persistAll(true);
+      renderAll();
+    }
+
+    // =========================================================
+    // TOP CATEGORY TAB BAR (THRILLS / FAMILY)
+    // =========================================================
+    function selectRideCategory(category) {
+      if (!RIDE_CATEGORIES.includes(category)) return;
+      state.activeRideCategory = category;
+      syncCategoryTabUi();
+      renderRidesList();
+    }
+
+    function syncCategoryTabUi() {
+      for (const cat of RIDE_CATEGORIES) {
+        const isActive = state.activeRideCategory === cat;
+        const tabBtn = document.getElementById(`cat-tab-${cat}`);
+        const bar = document.getElementById(`cat-bar-${cat}`);
+        if (tabBtn) {
+          tabBtn.setAttribute('aria-selected', String(isActive));
+          tabBtn.classList.toggle('text-white', isActive);
+          tabBtn.classList.toggle('text-white/80', !isActive);
+        }
+        if (bar) {
+          bar.classList.toggle('hidden', !isActive);
+        }
+      }
+    }
+
+    // =========================================================
+    // MERLIN RIDE ARTWORK (Matches Screenshot Tiles)
+    // =========================================================
+    const svgArtworkMemo = new Map();
+
+    function makeRideArtworkSvg(name = '', category = 'Family') {
+      const cfg = getCurrentConfig();
+      const key = `${cfg.key}|${name}|${category}`;
+      if (svgArtworkMemo.has(key)) return svgArtworkMemo.get(key);
+
+      const lower = String(name).toLowerCase();
+      let c1 = '#1E3A8A';
+      let c2 = '#2563EB';
+      let accent = '#38BDF8';
+      let glyph = '⚓';
+
+      if (lower.includes('dragon')) {
+        c1 = '#991B1B'; c2 = '#DC2626'; accent = '#F5B82E'; glyph = '🐉';
+      } else if (lower.includes('mamba') || lower.includes('mandrill') || lower.includes('ostrich') || lower.includes('monkey')) {
+        c1 = '#78350F'; c2 = '#B45309'; accent = '#FACC15'; glyph = '🐒';
+      } else if (lower.includes('rattlesnake') || lower.includes('tiger') || lower.includes('croc') || lower.includes('sky lion')) {
+        c1 = '#115E59'; c2 = '#0D9488'; accent = '#F5B82E'; glyph = '🐅';
+      } else if (lower.includes('vampire') || lower.includes('ghost') || lower.includes('walking dead') || lower.includes('saw')) {
+        c1 = '#3B0764'; c2 = '#6B21A8'; accent = '#F5B82E'; glyph = '🦇';
+      } else if (lower.includes('hyperia') || lower.includes('stealth') || lower.includes('swarm') || lower.includes('nemesis') || lower.includes('colossus')) {
+        c1 = '#0F172A'; c2 = '#1E293B'; accent = '#FACC15'; glyph = '🎢';
+      } else if (lower.includes('gruffalo') || lower.includes('room on the broom') || lower.includes('ninjago')) {
+        c1 = '#14532D'; c2 = '#15803D'; accent = '#F5B82E'; glyph = '🌲';
+      } else if (category === 'Thrills') {
+        c1 = '#1E3A8A'; c2 = '#1D4ED8'; accent = '#F5B82E'; glyph = '🎢';
+      } else if (cfg.key === 'legoland') {
+        c1 = '#991B1B'; c2 = '#D9232E'; accent = '#FACC15'; glyph = '🧱';
+      }
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 104">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="${c1}" />
+              <stop offset="100%" stop-color="${c2}" />
+            </linearGradient>
+          </defs>
+          <rect width="136" height="104" fill="url(#g)" />
+          <circle cx="22" cy="20" r="4.5" fill="rgba(255,255,255,0.16)" />
+          <circle cx="114" cy="20" r="4.5" fill="rgba(255,255,255,0.16)" />
+          <path d="M0 78 Q42 64 80 76 T136 72 L136 104 L0 104 Z" fill="rgba(0,0,0,0.22)" />
+          <rect x="20" y="81" width="96" height="6" rx="3" fill="${accent}" opacity="0.92" />
+          <text x="68" y="52" font-size="36" text-anchor="middle" dominant-baseline="middle">${glyph}</text>
+        </svg>
+      `;
+      const dataUri = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+      svgArtworkMemo.set(key, dataUri);
+      return dataUri;
+    }
+
+    function getResolvedTileImage(name = '', category = 'Family') {
+      return { src: makeRideArtworkSvg(name, category) };
+    }
+
+    function getRideDesc(ride) {
+      const cfg = getCurrentConfig();
+      return `${ride.category} attraction located in ${ride.land} at ${cfg.fullName}. Minimum rider height: ${ride.minHeight}.`;
+    }
+
+    // =========================================================
+    // MERLIN TILE STATUS BADGES (Stopwatch & Coral 'i' Closed Badge)
+    // =========================================================
+    function getStopwatchSvgHtml() {
+      return `
+        <svg class="h-5 w-5 text-merlinNavy mx-auto" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="11.5" y1="3" x2="16.5" y2="3" />
+          <line x1="14" y1="3" x2="14" y2="6.5" />
+          <circle cx="14" cy="15.5" r="8.5" />
+          <line x1="14" y1="15.5" x2="14" y2="11" />
+          <circle cx="14" cy="15.5" r="1.4" fill="currentColor" stroke="none" />
+        </svg>
+      `;
+    }
+
+    function getOfficialClosedBadgeHtml() {
+      return `
+        <div class="flex flex-col items-center justify-center min-w-[54px]" aria-label="CLOSED">
+          <svg class="h-5 w-5 mx-auto" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="#E05A47" />
+            <circle cx="12" cy="7.5" r="1.4" fill="#FFFFFF" />
+            <rect x="10.75" y="10.4" width="2.5" height="6.8" rx="1.25" fill="#FFFFFF" />
+          </svg>
+          <div class="mt-1 text-[10px] font-bold leading-none tracking-wider text-slate-600 uppercase whitespace-nowrap">CLOSED</div>
+        </div>
+      `;
+    }
+
+    // =========================================================
+    // LIVE RIDE DATA & EFFECTIVE STATUS
+    // =========================================================
+    function getActiveDowntime(attractionId) {
+      return getCurrentBucket().downtimeRecords.find(r => r.attractionId === attractionId && r.status === 'ACTIVE') || null;
+    }
+
+    function getAllRides() {
+      const cfg = getCurrentConfig();
+      const bucket = getCurrentBucket();
+      const removed = new Set(bucket.removedIds);
+      const apiRides = state.apiRidesByResort[state.activeResort] || [];
+      const base = apiRides.length > 0 ? apiRides : cfg.defaultRides;
+      return [...base, ...bucket.customRides].filter(r => !removed.has(r.id));
+    }
+
+    function getAllKnownRidesIncludingRemoved() {
+      const cfg = getCurrentConfig();
+      const bucket = getCurrentBucket();
+      const apiRides = state.apiRidesByResort[state.activeResort] || [];
+      const base = apiRides.length > 0 ? apiRides : cfg.defaultRides;
+      return [...base, ...bucket.customRides];
+    }
+
+    function getEffectiveRide(rawRide) {
+      const nowMs = Date.now();
+      const bucket = getCurrentBucket();
+      const ov = bucket.rideOverrides[rawRide.id] || {};
+      const displayName = (ov.customName || '').trim() || rawRide.name;
+      const effectiveCategory = RIDE_CATEGORIES.includes(ov.category) ? ov.category : rawRide.category;
+      const effectiveLand = (ov.customLand || '').trim() || rawRide.land || getCurrentConfig().shortName;
+      const effectiveMinHeight = (ov.customMinHeight || '').trim() || rawRide.minHeight || (effectiveCategory === 'Thrills' ? '1.2m' : '0.9m');
+
+      const todayHoursInfo = getRideHoursForDate(rawRide.id, getTodayDateKey());
+      const scheduledClosed = todayHoursInfo.isClosed;
+      const pastClosing = isPastRideClosing(rawRide.id, nowMs);
+      const activeDt = pastClosing ? null : getActiveDowntime(rawRide.id);
+      const hasOverrideWait = typeof ov.waitTime === 'number' && !Number.isNaN(ov.waitTime);
+      const waitTime = hasOverrideWait
+        ? Math.max(0, Math.min(1000, ov.waitTime))
+        : (typeof rawRide.waitTime === 'number' && !Number.isNaN(rawRide.waitTime) ? Math.max(0, Math.min(1000, rawRide.waitTime)) : null);
+
+      const hasQueueData = typeof waitTime === 'number';
+      const customMessage = (ov.customStatus || '').trim();
+      const isApiDown = !pastClosing && rawRide.rawStatus === 'DOWN';
+      const isForceClosed = ov.delayMode === 'CLOSED_OFFICIAL';
+      const isTempDelay = !pastClosing && !isForceClosed && (ov.delayMode === 'TEMPORARY_DELAY' || isApiDown);
+      const isClosedState = pastClosing || isForceClosed || Boolean(activeDt) || (!hasOverrideWait && !isTempDelay && ['CLOSED', 'REFURBISHMENT', 'DOWN'].includes(rawRide.rawStatus));
+      const isDownOrDelay = !pastClosing && (isTempDelay || isClosedState);
+
+      let downSinceMs = null;
+      if (!pastClosing) {
+        if (activeDt) {
+          downSinceMs = activeDt.closedAtMs;
+        } else if (typeof ov.downSinceMs === 'number') {
+          downSinceMs = ov.downSinceMs;
+        } else if (typeof bucket.downSinceMap[rawRide.id] === 'number') {
+          downSinceMs = bucket.downSinceMap[rawRide.id];
+        }
+      }
+
+      const showDowntimeOnTile = Boolean(
+        !pastClosing && (
+          bucket.tileSettings.globalShowDowntimeOnTiles ||
+          ov.showDowntimeOnTile ||
+          (activeDt && activeDt.showOnTile)
+        )
+      );
+
+      let stateLabel = '';
+      if (pastClosing) {
+        stateLabel = 'Closed';
+      } else if (activeDt) {
+        stateLabel = customMessage || activeDt.reason || 'Closed';
+      } else if (isTempDelay) {
+        stateLabel = customMessage || 'Temporary Delay';
+      } else if (isClosedState) {
+        stateLabel = customMessage || (rawRide.rawStatus === 'REFURBISHMENT' ? 'Refurbishment' : 'Closed');
+      }
+
+      return {
+        ...rawRide,
+        name: displayName,
+        rawName: rawRide.name,
+        category: effectiveCategory,
+        land: effectiveLand,
+        minHeight: effectiveMinHeight,
+        waitTime,
+        hasQueueData: pastClosing ? false : hasQueueData,
+        hasOverrideWait,
+        customStatus: customMessage,
+        hasCustomHours: todayHoursInfo.isCustom,
+        scheduledClosed,
+        rideHoursText: todayHoursInfo.text,
+        pastClosing,
+        isTempDelay,
+        isClosedState,
+        isDownOrDelay,
+        downSinceMs,
+        showDowntimeOnTile,
+        stateLabel,
+        activeDt
+      };
+    }
+
+    function isRideClosed(ride) {
+      if (ride.pastClosing || ride.isClosedState) return true;
+      if (getActiveDowntime(ride.id)) return true;
+      if (ride.hasOverrideWait || ride.isTempDelay) return false;
+      return ['CLOSED', 'REFURBISHMENT'].includes(ride.rawStatus);
+    }
+
+    function syncDownSinceTimestamps(rides) {
+      const now = Date.now();
+      const bucket = getCurrentBucket();
+      let changed = false;
+
+      for (const rec of bucket.downtimeRecords) {
+        if (rec.status === 'ACTIVE' && isPastRideClosing(rec.attractionId, now)) {
+          const closeMs = getRideClosingMs(rec.attractionId, now) || now;
+          const endMs = isRideScheduledClosed(rec.attractionId)
+            ? now
+            : Math.max(rec.closedAtMs, Math.min(now, closeMs));
+          rec.status = 'COMPLETED';
+          rec.reopenedAtMs = endMs;
+          rec.durationMs = Math.max(0, endMs - rec.closedAtMs);
+          changed = true;
+        }
+      }
+
+      for (const r of rides) {
+        if (isPastRideClosing(r.id, now)) {
+          if (bucket.downSinceMap[r.id]) {
+            delete bucket.downSinceMap[r.id];
+            changed = true;
+          }
+          continue;
+        }
+
+        const ov = bucket.rideOverrides[r.id] || {};
+        const activeDt = getActiveDowntime(r.id);
+        const isDown = Boolean(activeDt) || ov.delayMode === 'TEMPORARY_DELAY' || ov.delayMode === 'CLOSED_OFFICIAL' || ['DOWN', 'CLOSED', 'REFURBISHMENT'].includes(r.rawStatus);
+        if (isDown) {
+          if (!bucket.downSinceMap[r.id]) {
+            bucket.downSinceMap[r.id] = activeDt ? activeDt.closedAtMs : (typeof ov.downSinceMs === 'number' ? ov.downSinceMs : now);
+            changed = true;
+          }
+        } else if (bucket.downSinceMap[r.id]) {
+          delete bucket.downSinceMap[r.id];
+          changed = true;
+        }
+      }
+      if (changed) saveLocalUnifiedDoc();
+    }
+
+    // =========================================================
+    // RENDERING: RIDE TILES (Matches Screenshot)
+    // =========================================================
+    function buildRideRow(ride) {
+      const closed = isRideClosed(ride);
+      const resolvedImg = getResolvedTileImage(ride.name, ride.category);
+
+      const downDurationText =
+        ride.isDownOrDelay && ride.showDowntimeOnTile && typeof ride.downSinceMs === 'number'
+          ? `Down ${formatMinutesDuration(Math.max(0, Date.now() - ride.downSinceMs))}`
+          : '';
+
+      let rightSideHtml = '';
+      let rowBg = 'bg-white hover:bg-slate-50/80';
+
+      if (ride.isTempDelay) {
+        rowBg = 'bg-amber-50/70 hover:bg-amber-50';
+        if (ride.hasQueueData) {
+          const minsLabel = `${ride.waitTime} ${ride.waitTime === 1 ? 'min' : 'mins'}`;
+          rightSideHtml = `
+            <div class="flex flex-col items-center justify-center min-w-[54px]">
+              ${getStopwatchSvgHtml()}
+              <div class="mt-0.5 text-[11px] font-extrabold text-slate-700 tabular-nums whitespace-nowrap">${escapeHtml(minsLabel)}</div>
+            </div>
+          `;
+        } else {
+          rightSideHtml = getOfficialClosedBadgeHtml();
+        }
+      } else if (closed) {
+        rightSideHtml = getOfficialClosedBadgeHtml();
+      } else if (ride.hasQueueData) {
+        const minsLabel = `${ride.waitTime} ${ride.waitTime === 1 ? 'min' : 'mins'}`;
+        rightSideHtml = `
+          <div class="flex flex-col items-center justify-center min-w-[54px]">
+            ${getStopwatchSvgHtml()}
+            <div class="mt-0.5 text-[12px] font-extrabold text-merlinNavy tabular-nums whitespace-nowrap">${escapeHtml(minsLabel)}</div>
+          </div>
+        `;
+      } else {
+        rightSideHtml = `
+          <div class="flex flex-col items-center justify-center min-w-[54px]">
+            ${getStopwatchSvgHtml()}
+            <div class="mt-0.5 text-[11px] font-extrabold text-merlinNavy whitespace-nowrap">Open</div>
+          </div>
+        `;
+      }
+
+      const subLineText = ride.customStatus || (downDurationText ? downDurationText : '');
+      const subLineHtml = subLineText
+        ? `<div class="mt-0.5 text-[13px] font-medium leading-snug text-slate-600 truncate">${escapeHtml(subLineText)}</div>`
+        : '';
+
+      return `
+        <div
+          role="button"
+          tabindex="0"
+          onclick="handleRideRowClick('${escapeAttr(ride.id)}')"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRideRowClick('${escapeAttr(ride.id)}');}"
+          class="flex items-center gap-3.5 ${rowBg} px-3.5 py-3 active:bg-slate-100 transition cursor-pointer select-none min-h-[78px]"
+        >
+          <div class="cw-tile-thumb">
+            <img
+              src="${resolvedImg.src}"
+              alt="${escapeAttr(ride.name)}"
+              decoding="async"
+            />
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <h3 class="text-[16px] font-bold leading-snug text-merlinNavy truncate">
+              ${escapeHtml(ride.name)}
+            </h3>
+            ${subLineHtml}
+          </div>
+
+          <div class="flex items-center gap-2.5 shrink-0">
+            ${rightSideHtml}
+            <span class="text-slate-400 text-xl font-light leading-none" aria-hidden="true">›</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRidesList() {
+      syncCategoryTabUi();
+      applyFeatureAvailabilityUi();
+      if (getCurrentBucket().features.queuesEnabled === false) return;
+
+      const container = document.getElementById('rides-list-container');
+      if (!container) return;
+
+      const mainSearch = document.getElementById('ride-search-input');
+      const inlineSearch = document.getElementById('queues-inline-search');
+      const rawQuery = (inlineSearch && inlineSearch.value.trim()) || (mainSearch && mainSearch.value.trim()) || '';
+      const query = getCurrentBucket().features.searchEnabled === false ? '' : rawQuery.toLowerCase();
+
+      const effective = getAllRides()
+        .map(getEffectiveRide)
+        .filter(r => r.category === state.activeRideCategory)
+        .filter(r => !query || r.name.toLowerCase().includes(query) || (r.customStatus && r.customStatus.toLowerCase().includes(query)));
+
+      effective.sort((a, b) => {
+        const aClosed = isRideClosed(a);
+        const bClosed = isRideClosed(b);
+        if (aClosed !== bClosed) return aClosed ? 1 : -1;
+        if (!aClosed && !bClosed) {
+          const aw = typeof a.waitTime === 'number' ? a.waitTime : -1;
+          const bw = typeof b.waitTime === 'number' ? b.waitTime : -1;
+          if (aw !== bw) return aw - bw;
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      container.innerHTML = effective.map(buildRideRow).join('');
+    }
+
+    function updateCountsAndOverview() {
+      const all = getAllRides().map(getEffectiveRide);
+      const openRides = all.filter(r => !isRideClosed(r));
+      const closedCount = all.length - openRides.length;
+      const waits = openRides.filter(r => typeof r.waitTime === 'number').map(r => r.waitTime);
+      const avgWait = waits.length ? Math.round(waits.reduce((s, v) => s + v, 0) / waits.length) : 0;
+
+      setText('explore-live-count-badge', `${all.length} Attractions`);
+      setText('stat-open-count', openRides.length);
+      setText('stat-avg-wait', `${avgWait}m`);
+      setText('stat-closed-count', closedCount);
+
+      const totalCount = all.length;
+      const overallPct = totalCount > 0 ? Math.round((openRides.length / totalCount) * 100) : 0;
+
+      const thrillsAll = all.filter(r => r.category === 'Thrills');
+      const thrillsOpen = thrillsAll.filter(r => !isRideClosed(r));
+      const thrillsPct = thrillsAll.length > 0 ? Math.round((thrillsOpen.length / thrillsAll.length) * 100) : 0;
+
+      const familyAll = all.filter(r => r.category === 'Family');
+      const familyOpen = familyAll.filter(r => !isRideClosed(r));
+      const familyPct = familyAll.length > 0 ? Math.round((familyOpen.length / familyAll.length) * 100) : 0;
+
+      setText('avail-overall-pct', `${overallPct}%`);
+      setText('avail-open-ratio', `${openRides.length} / ${totalCount}`);
+      setText('avail-thrills-pct', `${thrillsPct}%`);
+      setText('avail-family-pct', `${familyPct}%`);
+      const bar = document.getElementById('avail-overall-bar');
+      if (bar) bar.style.width = `${overallPct}%`;
+    }
+
+    function renderDowntimeLogs() {
+      const activeBox = document.getElementById('active-downtime-list');
+      const compBox = document.getElementById('completed-downtime-list');
+      if (!activeBox || !compBox) return;
+
+      const now = Date.now();
+      const records = getCurrentBucket().downtimeRecords;
+      const active = records.filter(r => r.status === 'ACTIVE');
+      const completed = records.filter(r => r.status === 'COMPLETED').slice().reverse();
+
+      setText('dt-active-badge', `${active.length} Active`);
+
+      const clearBtn = document.getElementById('dt-clear-history-btn');
+      if (clearBtn) clearBtn.classList.toggle('hidden', !state.adminUnlocked || completed.length === 0);
+
+      if (active.length === 0) {
+        activeBox.innerHTML = `<div class="rounded-2xl bg-white p-4 text-center text-xs font-bold text-slate-500 border border-slate-200">No active ride downtimes logged right now.</div>`;
+      } else {
+        activeBox.innerHTML = active.map(rec => {
+          const durText = formatMinutesDuration(Math.max(0, now - rec.closedAtMs));
+          const actionHtml = state.adminUnlocked
+            ? `<button
+                type="button"
+                onclick="markDowntimeReopened('${escapeAttr(rec.id)}')"
+                class="rounded-xl resort-bg-primary resort-bg-primary-hover px-3 py-1.5 text-[11px] font-extrabold text-white shrink-0 cursor-pointer"
+              >
+                Mark Resolved
+              </button>`
+            : `<span class="rounded-lg bg-rose-50 border border-rose-200 px-2.5 py-1 text-[10px] font-black text-rose-700 shrink-0">
+                Active
+              </span>`;
+          return `
+            <div class="rounded-2xl bg-white p-3.5 shadow-sm border border-rose-200 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(rec.attractionName)}</div>
+                <div class="text-[11px] font-bold text-rose-700 mt-0.5">${escapeHtml(rec.reason)} • Down ${escapeHtml(durText)}</div>
+              </div>
+              ${actionHtml}
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (completed.length === 0) {
+        compBox.innerHTML = `<div class="rounded-2xl bg-white p-4 text-center text-xs font-bold text-slate-500 border border-slate-200">No resolved downtime entries yet.</div>`;
+      } else {
+        compBox.innerHTML = completed.map(rec => {
+          const durText = formatMinutesDuration(rec.durationMs || 0);
+          return `
+            <div class="rounded-2xl bg-white p-3 shadow-sm border border-slate-200 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(rec.attractionName)}</div>
+                <div class="text-[11px] text-slate-500">${escapeHtml(rec.reason)}</div>
+              </div>
+              <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-800 tabular-nums shrink-0">
+                ${escapeHtml(durText)}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // =========================================================
+    // DETAILED RIDE MODAL
+    // =========================================================
+    function handleRideRowClick(rideId) {
+      const raw = getAllRides().find(r => r.id === rideId);
+      if (!raw) return;
+      const ride = getEffectiveRide(raw);
+      const closed = isRideClosed(ride);
+      const resolvedImg = getResolvedTileImage(ride.name, ride.category);
+      const cfg = getCurrentConfig();
+      const bucket = getCurrentBucket();
+
+      const downDurationText =
+        ride.isDownOrDelay && typeof ride.downSinceMs === 'number'
+          ? `Down for ${formatMinutesDuration(Math.max(0, Date.now() - ride.downSinceMs))}`
+          : '';
+
+      let statusBlock = '';
+      if (ride.isTempDelay) {
+        statusBlock = `
+          <div class="rounded-xl bg-amber-50 border border-amber-300 p-3 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-black text-amber-950">${escapeHtml(ride.stateLabel || 'Temporary Delay')}</div>
+              ${downDurationText ? `<div class="text-[11px] font-bold text-amber-800 mt-0.5">${escapeHtml(downDurationText)}</div>` : ''}
+            </div>
+            <span class="rounded-lg bg-amber-400 px-2.5 py-1 text-xs font-black text-slate-950">
+              ${ride.hasQueueData ? `${ride.waitTime} mins` : 'Delayed'}
+            </span>
+          </div>
+        `;
+      } else if (closed) {
+        statusBlock = `
+          <div class="rounded-xl bg-rose-50/80 border border-rose-200 p-3 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-extrabold text-merlinCoral">${escapeHtml(ride.stateLabel || 'Closed')}</div>
+              ${downDurationText ? `<div class="text-[11px] font-bold text-rose-600 mt-0.5">${escapeHtml(downDurationText)}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="11" fill="#E05A47" />
+                <circle cx="12" cy="7.5" r="1.4" fill="#FFFFFF" />
+                <rect x="10.75" y="10.4" width="2.5" height="6.8" rx="1.25" fill="#FFFFFF" />
+              </svg>
+              <span class="text-xs font-bold text-slate-600 uppercase">CLOSED</span>
+            </div>
+          </div>
+        `;
+      } else if (ride.hasQueueData) {
+        statusBlock = `
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
+            <span class="text-xs font-extrabold text-emerald-900">Current Stand-By Queue</span>
+            <span class="text-sm font-black text-emerald-800 tabular-nums">${ride.waitTime} ${ride.waitTime === 1 ? 'min' : 'mins'}</span>
+          </div>
+        `;
+      } else {
+        statusBlock = `
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
+            <span class="text-xs font-extrabold text-emerald-900">Attraction Status</span>
+            <span class="text-xs font-black text-emerald-800">Open</span>
+          </div>
+        `;
+      }
+
+      const customNoteBanner = ride.customStatus
+        ? `<div class="rounded-xl bg-slate-100 border border-slate-200 px-3 py-2 text-xs font-bold text-merlinNavy">
+             💬 ${escapeHtml(ride.customStatus)}
+           </div>`
+        : '';
+
+      const showUpcomingRides = Boolean(bucket.tileSettings && bucket.tileSettings.showUpcomingRideHours);
+      const todayKey = getTodayDateKey();
+      const upcomingDates = showUpcomingRides
+        ? Object.keys(bucket.advanceSchedules || {}).filter(d => d >= todayKey).sort().slice(0, 4)
+        : [];
+
+      const upcomingHtml = upcomingDates.length > 0
+        ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-2.5 space-y-1">
+             <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Upcoming Ride Opening Hours</div>
+             ${upcomingDates.map(d => {
+               const info = getRideHoursForDate(ride.id, d);
+               return `<div class="flex items-center justify-between text-[11px] font-bold">
+                 <span class="text-slate-600">${escapeHtml(formatDisplayDate(d))}</span>
+                 <span class="${info.isClosed ? 'text-merlinCoral' : 'text-slate-900'} tabular-nums">${escapeHtml(info.text)}</span>
+               </div>`;
+             }).join('')}
+           </div>`
+        : '';
+
+      const contentEl = document.getElementById('ride-modal-content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="relative h-44 w-full bg-merlinNavy">
+            <img
+              src="${resolvedImg.src}"
+              alt="${escapeAttr(ride.name)}"
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+            <button type="button" onclick="closeRideModal()" class="absolute top-2.5 right-2.5 rounded-full bg-black/75 text-white px-3 py-1 text-xs font-extrabold cursor-pointer">Close</button>
+          </div>
+          <div class="p-4 space-y-3">
+            <div class="flex items-center gap-2.5">
+              <div class="h-10 w-10 shrink-0 rounded-xl bg-slate-50 border border-slate-200 p-0.5 overflow-hidden">
+                <img src="${cfg.logoUri}" alt="${escapeAttr(cfg.shortName)} Logo" class="h-full w-full object-contain rounded-[9px]" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="rounded-full resort-bg-primary text-white px-2 py-0.5 text-[10px] font-extrabold uppercase">${escapeHtml(ride.category)}</span>
+                  <span class="rounded-full bg-merlinGold/35 text-merlinNavy px-2 py-0.5 text-[10px] font-extrabold">${escapeHtml(ride.land)}</span>
+                  <span class="rounded-full bg-slate-100 text-slate-700 px-2 py-0.5 text-[10px] font-extrabold">Min ${escapeHtml(ride.minHeight)}</span>
+                </div>
+                <h2 class="mt-1 text-lg font-extrabold text-merlinNavy truncate">${escapeHtml(ride.name)}</h2>
+              </div>
+            </div>
+
+            ${customNoteBanner}
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="rounded-xl bg-slate-100/90 border border-slate-200 px-3 py-2">
+                <div class="text-[10px] font-bold text-slate-500">🕒 Opening Hours</div>
+                <div class="font-black ${ride.scheduledClosed ? 'text-merlinCoral' : 'text-slate-900'} tabular-nums mt-0.5">
+                  ${escapeHtml(ride.rideHoursText)}
+                </div>
+              </div>
+              <div class="rounded-xl bg-slate-100/90 border border-slate-200 px-3 py-2">
+                <div class="text-[10px] font-bold text-slate-500">📏 Rider Height</div>
+                <div class="font-black text-slate-900 mt-0.5">Min ${escapeHtml(ride.minHeight)}</div>
+              </div>
+            </div>
+
+            ${statusBlock}
+            ${upcomingHtml}
+            <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(getRideDesc(ride))}</p>
+          </div>
+        `;
+      }
+
+      const modal = document.getElementById('ride-detail-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeRideModal() {
+      const modal = document.getElementById('ride-detail-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // =========================================================
+    // TAB SWITCHING
+    // =========================================================
+    function switchTab(tabName) {
+      if (tabName === 'map' && getCurrentBucket().features.mapEnabled === false) {
+        tabName = 'explore';
+      }
+      state.activeTab = tabName;
+      const tabs = ['explore', 'rides', 'map', 'downtime', 'admin'];
+      for (const t of tabs) {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) el.classList.toggle('hidden', t !== tabName);
+        const navKey = t === 'admin' ? 'downtime' : t;
+        const btn = document.getElementById(`nav-btn-${navKey}`);
+        if (btn) {
+          const isSelected = state.activeTab === navKey || (state.activeTab === 'admin' && navKey === 'downtime');
+          btn.classList.toggle('resort-text-primary', isSelected);
+          btn.classList.toggle('font-extrabold', isSelected);
+          btn.classList.toggle('text-slate-500', !isSelected);
+          btn.classList.toggle('font-semibold', !isSelected);
+        }
+      }
+
+      const topHeader = document.getElementById('top-app-header');
+      if (topHeader) {
+        topHeader.classList.toggle('hidden', tabName === 'rides');
+      }
+
+      if (tabName === 'map' && getCurrentBucket().features.mapEnabled !== false) {
+        requestAnimationFrame(drawMaps);
+      }
+      renderAll();
+    }
+
+    // =========================================================
+    // INTERACTIVE MERLIN RESORT MAP
+    // =========================================================
+    function renderZonePills() {
+      const box = document.getElementById('map-zone-pills');
+      if (!box) return;
+      const zones = getCurrentConfig().zones;
+      box.innerHTML = zones.map(z => {
+        const active = state.activeZoneId === z.id;
+        return `
+          <button
+            type="button"
+            onclick="jumpToMapZone('${escapeAttr(z.id)}')"
+            class="rounded-full px-3 py-1 text-[11px] font-extrabold whitespace-nowrap transition cursor-pointer ${
+              active
+                ? 'resort-bg-primary text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }"
+          >
+            ${escapeHtml(z.label)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function jumpToMapZone(zoneId) {
+      const zones = getCurrentConfig().zones;
+      const zone = zones.find(z => z.id === zoneId) || zones[0];
+      state.activeZoneId = zone.id;
+      state.mapZoom = zone.zoom;
+      state.mapPanX = (0.5 - zone.x) * 320 * zone.zoom;
+      state.mapPanY = (0.5 - zone.y) * 320 * zone.zoom;
+      renderZonePills();
+      drawMaps();
+    }
+
+    function adjustMapZoom(delta) {
+      state.mapZoom = Math.max(0.85, Math.min(2.6, Number((state.mapZoom + delta).toFixed(2))));
+      drawMaps();
+    }
+
+    function resetMapView() {
+      state.activeZoneId = 'all';
+      state.mapZoom = 1;
+      state.mapPanX = 0;
+      state.mapPanY = 0;
+      renderZonePills();
+      drawMaps();
+    }
+
+    function closeMapPinCard() {
+      state.selectedMapRideId = null;
+      const card = document.getElementById('map-selected-card');
+      if (card) card.classList.add('hidden');
+      drawMaps();
+    }
+
+    function drawSingleMap(canvasId, interactive) {
+      if (getCurrentBucket().features.mapEnabled === false) return;
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const cfg = getCurrentConfig();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.fillStyle = cfg.mapGroundBg;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      if (interactive) {
+        ctx.translate(w / 2 + state.mapPanX, h / 2 + state.mapPanY);
+        ctx.scale(state.mapZoom, state.mapZoom);
+        ctx.translate(-w / 2, -h / 2);
+      }
+
+      ctx.fillStyle = cfg.mapIslandFill;
+      ctx.beginPath();
+      ctx.ellipse(w * 0.50, h * 0.48, w * 0.37, h * 0.33, -0.05, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(w * 0.50, h * 0.16);
+      ctx.lineTo(w * 0.48, h * 0.45);
+      ctx.lineTo(w * 0.26, h * 0.36);
+      ctx.moveTo(w * 0.48, h * 0.45);
+      ctx.lineTo(w * 0.72, h * 0.38);
+      ctx.moveTo(w * 0.48, h * 0.45);
+      ctx.lineTo(w * 0.54, h * 0.70);
+      ctx.lineTo(w * 0.74, h * 0.64);
+      ctx.stroke();
+
+      const rides = getAllRides().map(getEffectiveRide);
+      canvas._pinHitBoxes = [];
+
+      for (const r of rides) {
+        const px = (r.x || 0.5) * w;
+        const py = (r.y || 0.5) * h;
+        const closed = isRideClosed(r);
+        const radius = interactive ? 10 : 5.5;
+
+        ctx.beginPath();
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.fillStyle = r.isTempDelay ? '#F59E0B' : (closed ? '#E05A47' : cfg.primaryColor);
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+
+        if (interactive) {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const badgeTxt = closed ? 'i' : (typeof r.waitTime === 'number' ? `${r.waitTime}` : '•');
+          ctx.fillText(badgeTxt, px, py);
+
+          canvas._pinHitBoxes.push({ ride: r, px, py, radius: radius + 6 });
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function drawMaps() {
+      if (getCurrentBucket().features.mapEnabled === false) return;
+      renderZonePills();
+      drawSingleMap('explore-map-canvas', false);
+      drawSingleMap('full-map-canvas', true);
+      const hrs = getEffectiveParkHoursText();
+      setText('map-source-label', `Merlin Map • Hours ${hrs} • ${Math.round(state.mapZoom * 100)}%`);
+    }
+
+    function setupMapInteractions() {
+      const canvas = document.getElementById('full-map-canvas');
+      if (!canvas) return;
+      let dragging = false;
+      let moved = false;
+      let startX = 0;
+      let startY = 0;
+
+      const onDown = (clientX, clientY) => {
+        dragging = true;
+        moved = false;
+        startX = clientX - state.mapPanX;
+        startY = clientY - state.mapPanY;
+      };
+
+      const onMove = (clientX, clientY) => {
+        if (!dragging) return;
+        const nx = clientX - startX;
+        const ny = clientY - startY;
+        if (Math.abs(nx - state.mapPanX) > 4 || Math.abs(ny - state.mapPanY) > 4) {
+          moved = true;
+        }
+        state.mapPanX = nx;
+        state.mapPanY = ny;
+        drawMaps();
+      };
+
+      const onUp = (clientX, clientY) => {
+        if (!dragging) return;
+        dragging = false;
+        if (!moved && typeof clientX === 'number') {
+          const rect = canvas.getBoundingClientRect();
+          const w = rect.width;
+          const h = rect.height;
+          const rawX = clientX - rect.left;
+          const rawY = clientY - rect.top;
+          const worldX = (rawX - (w / 2 + state.mapPanX)) / state.mapZoom + w / 2;
+          const worldY = (rawY - (h / 2 + state.mapPanY)) / state.mapZoom + h / 2;
+
+          const hits = canvas._pinHitBoxes || [];
+          const hit = hits.find(hb => Math.hypot(worldX - hb.px, worldY - hb.py) <= hb.radius);
+          if (hit) {
+            selectMapRide(hit.ride);
+          }
+        }
+      };
+
+      canvas.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
+      window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+      window.addEventListener('mouseup', e => onUp(e.clientX, e.clientY));
+
+      canvas.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+          onDown(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      canvas.addEventListener('touchmove', e => {
+        if (e.touches.length === 1) {
+          onMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      canvas.addEventListener('touchend', e => {
+        const t = e.changedTouches && e.changedTouches[0];
+        onUp(t ? t.clientX : undefined, t ? t.clientY : undefined);
+      });
+    }
+
+    function selectMapRide(ride) {
+      state.selectedMapRideId = ride.id;
+      const card = document.getElementById('map-selected-card');
+      const closed = isRideClosed(ride);
+      setText('map-card-land', `${ride.category} • ${ride.land}`);
+      setText('map-card-title', ride.name);
+      setText(
+        'map-card-status',
+        ride.customStatus || (ride.isTempDelay
+          ? 'Temporary Delay'
+          : (closed ? 'Closed' : (ride.hasQueueData ? `${ride.waitTime} mins wait` : 'Open')))
+      );
+      const btn = document.getElementById('map-card-details-btn');
+      if (btn) btn.onclick = () => handleRideRowClick(ride.id);
+      if (card) card.classList.remove('hidden');
+    }
+
+    // =========================================================
+    // STAFF ADMIN PANEL (Passcode: CWOA26)
+    // =========================================================
+    function syncAdminControlsFromState() {
+      const bucket = getCurrentBucket();
+      const cfg = getCurrentConfig();
+      setText('admin-active-resort-banner', `Unlocked • ${cfg.shortName}`);
+      setText('cloud-sync-status-label', state.cloudStatusText);
+
+      const sUpPark = document.getElementById('adm-show-upcoming-park');
+      if (sUpPark) sUpPark.checked = Boolean(bucket.tileSettings && bucket.tileSettings.showUpcomingParkHours);
+      const sUpRides = document.getElementById('adm-show-upcoming-rides');
+      if (sUpRides) sUpRides.checked = Boolean(bucket.tileSettings && bucket.tileSettings.showUpcomingRideHours);
+
+      const fMap = document.getElementById('adm-feat-map');
+      if (fMap) fMap.checked = bucket.features.mapEnabled !== false;
+      const fQueues = document.getElementById('adm-feat-queues');
+      if (fQueues) fQueues.checked = bucket.features.queuesEnabled !== false;
+      const fSearch = document.getElementById('adm-feat-search');
+      if (fSearch) fSearch.checked = bucket.features.searchEnabled === true;
+      const fStats = document.getElementById('adm-feat-stats');
+      if (fStats) fStats.checked = bucket.features.statsEnabled !== false;
+      const fDt = document.getElementById('adm-feat-downtime');
+      if (fDt) fDt.checked = bucket.features.downtimeLogEnabled !== false;
+
+      const globalToggle = document.getElementById('adm-global-show-downtime');
+      if (globalToggle) globalToggle.checked = Boolean(bucket.tileSettings.globalShowDowntimeOnTiles);
+      const forceDtToggle = document.getElementById('adm-global-force-downtime');
+      if (forceDtToggle) forceDtToggle.checked = Boolean(bucket.tileSettings.forceDowntimeAfterClose);
+
+      const advDateInput = document.getElementById('adv-sched-date');
+      if (advDateInput && !advDateInput.value) {
+        advDateInput.value = getTodayDateKey();
+      }
+
+      loadParkHoursIntoForm();
+      loadAdvanceDateScheduleIntoForm();
+      renderAdvanceSchedulesList();
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderRemovedRidesList();
+    }
+
+    function unlockAdminPanel(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-passcode-input');
+      const err = document.getElementById('admin-passcode-error');
+      const val = input ? input.value.trim().toUpperCase() : '';
+
+      if (val === ADMIN_PASSCODE) {
+        state.adminUnlocked = true;
+        if (err) err.classList.add('hidden');
+        if (input) input.value = '';
+        const gate = document.getElementById('admin-lock-gate');
+        const panel = document.getElementById('admin-controls-panel');
+        if (gate) gate.classList.add('hidden');
+        if (panel) panel.classList.remove('hidden');
+
+        syncAdminControlsFromState();
+        renderAll();
+      } else {
+        if (err) err.classList.remove('hidden');
+        if (input) input.focus();
+      }
+    }
+
+    function lockAdminPanel() {
+      state.adminUnlocked = false;
+      const gate = document.getElementById('admin-lock-gate');
+      const panel = document.getElementById('admin-controls-panel');
+      if (gate) gate.classList.remove('hidden');
+      if (panel) panel.classList.add('hidden');
+      renderAll();
+    }
+
+    function toggleGlobalShowDowntime(checked) {
+      getCurrentBucket().tileSettings.globalShowDowntimeOnTiles = Boolean(checked);
+      persistAll(true);
+      renderAll();
+    }
+
+    function toggleForceDowntimeAfterClose(checked) {
+      getCurrentBucket().tileSettings.forceDowntimeAfterClose = Boolean(checked);
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderAll();
+    }
+
+    function loadParkHoursIntoForm() {
+      const ph = getCurrentBucket().parkHours;
+      const openEl = document.getElementById('adm-park-open');
+      const closeEl = document.getElementById('adm-park-close');
+      const labelEl = document.getElementById('adm-park-event-label');
+      if (openEl) openEl.value = ph.open || '10:00';
+      if (closeEl) closeEl.value = ph.close || '17:00';
+      if (labelEl) labelEl.value = ph.eventLabel || '';
+    }
+
+    function saveParkHours(e) {
+      e.preventDefault();
+      if (!state.adminUnlocked) return;
+      const openEl = document.getElementById('adm-park-open');
+      const closeEl = document.getElementById('adm-park-close');
+      const labelEl = document.getElementById('adm-park-event-label');
+      const fb = document.getElementById('park-hours-feedback');
+
+      const open = openEl && openEl.value ? openEl.value : '10:00';
+      const close = closeEl && closeEl.value ? closeEl.value : '17:00';
+      const eventLabel = labelEl ? labelEl.value.trim() : '';
+
+      getCurrentBucket().parkHours = { isClosed: false, open, close, eventLabel };
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = `Updated Default Park Hours to ${open} – ${close}${eventLabel ? ` (${eventLabel})` : ''}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function setParkClosedToday() {
+      if (!state.adminUnlocked) return;
+      const fb = document.getElementById('park-hours-feedback');
+      getCurrentBucket().parkHours = {
+        ...getCurrentBucket().parkHours,
+        isClosed: true
+      };
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = 'Resort Park Opening Hours set to Closed.';
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function resetParkHoursDefault() {
+      if (!state.adminUnlocked) return;
+      getCurrentBucket().parkHours = { isClosed: false, open: '10:00', close: '17:00', eventLabel: 'Open Today' };
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      loadParkHoursIntoForm();
+      renderBatchRidesChecklist();
+      renderAll();
+    }
+
+    // =========================================================
+    // ADVANCE DATE-SCHEDULED OPENING HOURS (PARK & ATTRACTIONS)
+    // =========================================================
+    function loadAdvanceDateScheduleIntoForm() {
+      const dateEl = document.getElementById('adv-sched-date');
+      const openEl = document.getElementById('adv-sched-open');
+      const closeEl = document.getElementById('adv-sched-close');
+      const labelEl = document.getElementById('adv-sched-label');
+      const dateKey = dateEl && dateEl.value ? dateEl.value : getTodayDateKey();
+
+      const ph = getParkHoursForDate(dateKey);
+      if (openEl) openEl.value = ph.open || '10:00';
+      if (closeEl) closeEl.value = ph.close || '17:00';
+      if (labelEl) labelEl.value = ph.eventLabel || '';
+    }
+
+    function saveAdvanceParkSchedule(isClosed) {
+      if (!state.adminUnlocked) return;
+      const dateEl = document.getElementById('adv-sched-date');
+      const openEl = document.getElementById('adv-sched-open');
+      const closeEl = document.getElementById('adv-sched-close');
+      const labelEl = document.getElementById('adv-sched-label');
+      const fb = document.getElementById('adv-sched-feedback');
+
+      const dateKey = dateEl && dateEl.value ? dateEl.value : getTodayDateKey();
+      const open = openEl && openEl.value ? openEl.value : '10:00';
+      const close = closeEl && closeEl.value ? closeEl.value : '17:00';
+      const eventLabel = labelEl ? labelEl.value.trim() : '';
+
+      const bucket = getCurrentBucket();
+      if (!bucket.advanceSchedules) bucket.advanceSchedules = {};
+      const existing = bucket.advanceSchedules[dateKey] || {};
+      bucket.advanceSchedules[dateKey] = {
+        ...existing,
+        park: { isClosed: Boolean(isClosed), open, close, eventLabel }
+      };
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderAdvanceSchedulesList();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = isClosed
+          ? `Scheduled Park Closed on ${formatDisplayDate(dateKey)}.`
+          : `Scheduled ${open} – ${close} on ${formatDisplayDate(dateKey)}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function saveAdvanceRideSchedule(isClosed) {
+      if (!state.adminUnlocked) return;
+      const dateEl = document.getElementById('adv-sched-date');
+      const rideEl = document.getElementById('adv-ride-select');
+      const openEl = document.getElementById('adv-ride-open');
+      const closeEl = document.getElementById('adv-ride-close');
+      const fb = document.getElementById('adv-sched-feedback');
+
+      const dateKey = dateEl && dateEl.value ? dateEl.value : getTodayDateKey();
+      const rideId = rideEl ? rideEl.value : '';
+      if (!rideId) return;
+
+      const open = openEl && openEl.value ? openEl.value : '10:00';
+      const close = closeEl && closeEl.value ? closeEl.value : '17:00';
+
+      const bucket = getCurrentBucket();
+      if (!bucket.advanceSchedules) bucket.advanceSchedules = {};
+      const existing = bucket.advanceSchedules[dateKey] || {};
+      const ridesMap = { ...(existing.rides || {}) };
+      ridesMap[rideId] = isClosed ? { isClosed: true } : { isClosed: false, open, close };
+
+      bucket.advanceSchedules[dateKey] = {
+        ...existing,
+        rides: ridesMap
+      };
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderAdvanceSchedulesList();
+      renderAll();
+
+      if (fb) {
+        const rideObj = getAllRides().map(getEffectiveRide).find(r => r.id === rideId);
+        const rName = rideObj ? rideObj.name : 'Attraction';
+        fb.textContent = isClosed
+          ? `Set ${rName} Closed on ${formatDisplayDate(dateKey)}.`
+          : `Set ${rName} (${open} – ${close}) on ${formatDisplayDate(dateKey)}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function deleteAdvanceDateSchedule(dateKey) {
+      if (!state.adminUnlocked) return;
+      const bucket = getCurrentBucket();
+      if (bucket.advanceSchedules && bucket.advanceSchedules[dateKey]) {
+        delete bucket.advanceSchedules[dateKey];
+        persistAll(true);
+        renderAdvanceSchedulesList();
+        renderAll();
+      }
+    }
+
+    function renderAdvanceSchedulesList() {
+      const box = document.getElementById('advance-schedules-list');
+      if (!box) return;
+      const scheds = getCurrentBucket().advanceSchedules || {};
+      const dates = Object.keys(scheds).sort();
+
+      if (dates.length === 0) {
+        box.innerHTML = `<div class="text-[11px] font-semibold text-slate-400">No advance dates scheduled yet.</div>`;
+        return;
+      }
+
+      box.innerHTML = dates.map(dateKey => {
+        const entry = scheds[dateKey] || {};
+        const parkSummary = entry.park
+          ? (entry.park.isClosed ? 'Park Closed' : `${entry.park.open} – ${entry.park.close}${entry.park.eventLabel ? ` (${entry.park.eventLabel})` : ''}`)
+          : 'Default Park Hours';
+        const rideCount = entry.rides ? Object.keys(entry.rides).length : 0;
+        return `
+          <div class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs">
+            <div class="min-w-0">
+              <div class="font-extrabold text-merlinNavy">${escapeHtml(formatDisplayDate(dateKey))}</div>
+              <div class="text-[11px] text-slate-600 truncate">${escapeHtml(parkSummary)}${rideCount > 0 ? ` • ${rideCount} ride override${rideCount === 1 ? '' : 's'}` : ''}</div>
+            </div>
+            <button
+              type="button"
+              onclick="deleteAdvanceDateSchedule('${escapeAttr(dateKey)}')"
+              class="rounded-lg bg-rose-100 hover:bg-rose-200 px-2 py-1 text-[10px] font-extrabold text-rose-700 shrink-0 cursor-pointer"
+            >
+              Delete
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================
+    // MULTI-ATTRACTION BATCH EDITOR
+    // =========================================================
+    function renderBatchRidesChecklist() {
+      const box = document.getElementById('batch-rides-checklist');
+      if (!box) return;
+      const sorted = [...getAllRides()].map(getEffectiveRide).sort((a, b) => a.name.localeCompare(b.name));
+      const selectedSet = new Set(state.batchSelectedRideIds);
+
+      setText('batch-hours-count', `${selectedSet.size} selected`);
+
+      box.innerHTML = sorted.map(r => {
+        const checked = selectedSet.has(r.id);
+        const closed = isRideClosed(r);
+        const statusTag = `${r.category} • ${r.isTempDelay ? 'Delay' : (closed ? 'Closed' : (r.hasQueueData ? `${r.waitTime}m` : 'Open'))}`;
+        return `
+          <label class="flex items-center justify-between gap-2 px-3 py-2 text-xs cursor-pointer hover:bg-white transition select-none">
+            <span class="flex items-center gap-2 min-w-0">
+              <input
+                type="checkbox"
+                ${checked ? 'checked' : ''}
+                onchange="toggleBatchRideSelection('${escapeAttr(r.id)}', this.checked)"
+                class="h-4 w-4 rounded border-slate-300 text-merlinGreen focus:ring-merlinGreen shrink-0 cursor-pointer"
+              />
+              <span class="font-bold text-slate-900 truncate">${escapeHtml(r.name)}</span>
+            </span>
+            <span class="rounded px-1.5 py-0.5 text-[10px] font-extrabold shrink-0 tabular-nums ${
+              closed
+                ? 'bg-merlinCoral/15 text-merlinCoral'
+                : (r.isTempDelay ? 'bg-amber-100 text-amber-900' : 'bg-merlinGreen/15 text-merlinGreenDark')
+            }">
+              ${escapeHtml(statusTag)}
+            </span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function toggleBatchRideSelection(rideId, isChecked) {
+      const set = new Set(state.batchSelectedRideIds);
+      if (isChecked) set.add(rideId);
+      else set.delete(rideId);
+      state.batchSelectedRideIds = Array.from(set);
+      setText('batch-hours-count', `${state.batchSelectedRideIds.length} selected`);
+    }
+
+    function selectBatchRides(mode) {
+      const all = getAllRides().map(getEffectiveRide);
+      if (mode === 'NONE') {
+        state.batchSelectedRideIds = [];
+      } else if (mode === 'ALL') {
+        state.batchSelectedRideIds = all.map(r => r.id);
+      } else {
+        state.batchSelectedRideIds = all.filter(r => r.category === mode).map(r => r.id);
+      }
+      renderBatchRidesChecklist();
+    }
+
+    function moveBatchRidesToCategory(targetCategory) {
+      if (!state.adminUnlocked || !RIDE_CATEGORIES.includes(targetCategory)) return;
+      const fb = document.getElementById('batch-hours-feedback');
+      const bucket = getCurrentBucket();
+
+      if (state.batchSelectedRideIds.length === 0) {
+        if (fb) {
+          fb.textContent = 'Select at least one ride above first.';
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      for (const rideId of state.batchSelectedRideIds) {
+        const prev = bucket.rideOverrides[rideId] || {};
+        bucket.rideOverrides[rideId] = { ...prev, category: targetCategory };
+      }
+
+      persistAll(true);
+      renderBatchRidesChecklist();
+      populateAdminSelects();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = `Moved ${state.batchSelectedRideIds.length} attraction${state.batchSelectedRideIds.length === 1 ? '' : 's'} to ${targetCategory}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function applyBatchQueueAndState() {
+      if (!state.adminUnlocked) return;
+      const fb = document.getElementById('batch-hours-feedback');
+      const waitEl = document.getElementById('batch-queue-wait');
+      const stateEl = document.getElementById('batch-ride-state');
+      const msgEl = document.getElementById('batch-tile-message');
+      const bucket = getCurrentBucket();
+
+      if (state.batchSelectedRideIds.length === 0) {
+        if (fb) {
+          fb.textContent = 'Select at least one ride above first.';
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const waitRaw = waitEl ? waitEl.value.trim() : '';
+      const hasWait = waitRaw !== '';
+      const waitMins = hasWait ? Math.max(0, Math.min(300, Number(waitRaw))) : null;
+      const mode = stateEl ? stateEl.value : 'OPEN_QUEUE';
+      const customMsg = msgEl ? msgEl.value.trim() : '';
+
+      for (const rideId of state.batchSelectedRideIds) {
+        const prev = bucket.rideOverrides[rideId] || {};
+        const next = { ...prev };
+        delete next.hoursClosed;
+
+        if (customMsg) {
+          next.customStatus = customMsg;
+        }
+
+        if (mode === 'CLOSED_OFFICIAL') {
+          next.delayMode = 'CLOSED_OFFICIAL';
+          next.downSinceMs = prev.downSinceMs || Date.now();
+          delete next.waitTime;
+        } else if (mode === 'TEMPORARY_DELAY') {
+          next.delayMode = 'TEMPORARY_DELAY';
+          next.downSinceMs = prev.downSinceMs || Date.now();
+          if (hasWait) next.waitTime = waitMins;
+        } else if (mode === 'OPEN_QUEUE') {
+          delete next.delayMode;
+          delete next.downSinceMs;
+          if (hasWait) next.waitTime = waitMins;
+          else if (typeof next.waitTime !== 'number') next.waitTime = 5;
+        } else if (hasWait) {
+          next.waitTime = waitMins;
+        }
+
+        bucket.rideOverrides[rideId] = next;
+      }
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      populateAdminSelects();
+      renderAll();
+
+      if (fb) {
+        const detail = mode === 'CLOSED_OFFICIAL'
+          ? 'Closed'
+          : (hasWait ? `${waitMins} mins` : (mode === 'TEMPORARY_DELAY' ? 'Temporary Delay' : 'Open'));
+        fb.textContent = `Updated ${state.batchSelectedRideIds.length} ride${state.batchSelectedRideIds.length === 1 ? '' : 's'} to ${detail}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function applyBatchRideHours() {
+      if (!state.adminUnlocked) return;
+      const fb = document.getElementById('batch-hours-feedback');
+      const openEl = document.getElementById('batch-ride-open');
+      const closeEl = document.getElementById('batch-ride-close');
+      const bucket = getCurrentBucket();
+
+      if (state.batchSelectedRideIds.length === 0) {
+        if (fb) {
+          fb.textContent = 'Select at least one ride above first.';
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const openTime = openEl && openEl.value ? openEl.value : (bucket.parkHours.open || '10:00');
+      const closeTime = closeEl && closeEl.value ? closeEl.value : (bucket.parkHours.close || '17:00');
+
+      for (const rideId of state.batchSelectedRideIds) {
+        const prev = bucket.rideOverrides[rideId] || {};
+        const next = { ...prev, openTime, closeTime };
+        delete next.hoursClosed;
+        bucket.rideOverrides[rideId] = next;
+      }
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = `Applied ${openTime} – ${closeTime} to ${state.batchSelectedRideIds.length} ride${state.batchSelectedRideIds.length === 1 ? '' : 's'}.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function setSelectedRidesClosedHours() {
+      if (!state.adminUnlocked) return;
+      const fb = document.getElementById('batch-hours-feedback');
+      const bucket = getCurrentBucket();
+
+      if (state.batchSelectedRideIds.length === 0) {
+        if (fb) {
+          fb.textContent = 'Select at least one ride above first.';
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      for (const rideId of state.batchSelectedRideIds) {
+        const prev = bucket.rideOverrides[rideId] || {};
+        const next = { ...prev, hoursClosed: true };
+        delete next.openTime;
+        delete next.closeTime;
+        bucket.rideOverrides[rideId] = next;
+      }
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = `Set ${state.batchSelectedRideIds.length} ride${state.batchSelectedRideIds.length === 1 ? '' : 's'} to Closed.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function clearBatchRideHours() {
+      if (!state.adminUnlocked) return;
+      const fb = document.getElementById('batch-hours-feedback');
+      const bucket = getCurrentBucket();
+
+      if (state.batchSelectedRideIds.length === 0) {
+        if (fb) {
+          fb.textContent = 'Select at least one ride above to reset.';
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      for (const rideId of state.batchSelectedRideIds) {
+        delete bucket.rideOverrides[rideId];
+        delete bucket.downSinceMap[rideId];
+      }
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      renderBatchRidesChecklist();
+      populateAdminSelects();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = `Reset ${state.batchSelectedRideIds.length} selected ride${state.batchSelectedRideIds.length === 1 ? '' : 's'} to default/API state.`;
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function populateAdminSelects() {
+      const sorted = [...getAllRides()].map(getEffectiveRide).sort((a, b) => a.name.localeCompare(b.name));
+      const opts = sorted.map(r => `<option value="${escapeAttr(r.id)}">${escapeHtml(r.name)} (${escapeHtml(r.category)})</option>`).join('');
+      const qovSel = document.getElementById('qov-ride-select');
+      const dtSel = document.getElementById('dt-ride-select');
+      const remSel = document.getElementById('rem-ride-select');
+      const advSel = document.getElementById('adv-ride-select');
+
+      const prevQov = qovSel ? qovSel.value : '';
+      if (qovSel) {
+        qovSel.innerHTML = opts;
+        if (prevQov && sorted.some(r => r.id === prevQov)) qovSel.value = prevQov;
+      }
+      if (dtSel) dtSel.innerHTML = opts;
+      if (remSel) remSel.innerHTML = opts;
+      if (advSel) advSel.innerHTML = opts;
+      loadRideOverrideIntoForm();
+    }
+
+    function loadRideOverrideIntoForm() {
+      const sel = document.getElementById('qov-ride-select');
+      if (!sel || !sel.value) return;
+      const raw = getAllRides().find(r => r.id === sel.value);
+      if (!raw) return;
+      const eff = getEffectiveRide(raw);
+      const ov = getCurrentBucket().rideOverrides[sel.value] || {};
+
+      const nameEl = document.getElementById('qov-custom-name');
+      const catEl = document.getElementById('qov-category-select');
+      const landEl = document.getElementById('qov-custom-land');
+      const heightEl = document.getElementById('qov-custom-height');
+      const modeEl = document.getElementById('qov-delay-mode');
+      const waitEl = document.getElementById('qov-wait-input');
+      const statusEl = document.getElementById('qov-status-text');
+      const dtEl = document.getElementById('qov-show-downtime');
+
+      if (nameEl) nameEl.value = eff.name;
+      if (catEl) catEl.value = eff.category;
+      if (landEl) landEl.value = eff.land;
+      if (heightEl) heightEl.value = eff.minHeight;
+      if (modeEl) modeEl.value = ov.delayMode || 'AUTO';
+      if (waitEl) waitEl.value = typeof ov.waitTime === 'number' ? ov.waitTime : '';
+      if (statusEl) statusEl.value = ov.customStatus || '';
+      if (dtEl) dtEl.checked = Boolean(ov.showDowntimeOnTile);
+    }
+
+    function saveQueueAndStatusOverride(e) {
+      e.preventDefault();
+      if (!state.adminUnlocked) return;
+      const sel = document.getElementById('qov-ride-select');
+      const nameEl = document.getElementById('qov-custom-name');
+      const catEl = document.getElementById('qov-category-select');
+      const landEl = document.getElementById('qov-custom-land');
+      const heightEl = document.getElementById('qov-custom-height');
+      const modeEl = document.getElementById('qov-delay-mode');
+      const waitEl = document.getElementById('qov-wait-input');
+      const statusEl = document.getElementById('qov-status-text');
+      const dtEl = document.getElementById('qov-show-downtime');
+      const fb = document.getElementById('qov-feedback');
+
+      const rideId = sel ? sel.value : '';
+      if (!rideId) return;
+      const raw = getAllRides().find(r => r.id === rideId);
+      if (!raw) return;
+
+      const bucket = getCurrentBucket();
+      const prevOv = bucket.rideOverrides[rideId] || {};
+      const customName = nameEl ? nameEl.value.trim() : '';
+      const category = catEl && RIDE_CATEGORIES.includes(catEl.value) ? catEl.value : raw.category;
+      const customLand = landEl ? landEl.value.trim() : '';
+      const customMinHeight = heightEl ? heightEl.value.trim() : '';
+      const delayMode = modeEl ? modeEl.value : 'AUTO';
+      const waitRaw = waitEl ? waitEl.value.trim() : '';
+      const customStatus = statusEl ? statusEl.value.trim() : '';
+      const showDowntimeOnTile = Boolean(dtEl ? dtEl.checked : false);
+
+      const next = {};
+      if (prevOv.openTime) next.openTime = prevOv.openTime;
+      if (prevOv.closeTime) next.closeTime = prevOv.closeTime;
+      if (prevOv.hoursClosed) next.hoursClosed = true;
+
+      if (customName && customName !== raw.name) next.customName = customName;
+      if (category !== raw.category) next.category = category;
+      if (customLand && customLand !== (raw.land || '')) next.customLand = customLand;
+      if (customMinHeight && customMinHeight !== (raw.minHeight || '')) next.customMinHeight = customMinHeight;
+
+      if (delayMode && delayMode !== 'AUTO') {
+        next.delayMode = delayMode;
+        next.downSinceMs = prevOv.downSinceMs || Date.now();
+      }
+      if (waitRaw !== '' && delayMode !== 'CLOSED_OFFICIAL') {
+        next.waitTime = Math.max(0, Math.min(300, Number(waitRaw)));
+      }
+      if (customStatus) next.customStatus = customStatus;
+      if (showDowntimeOnTile) next.showDowntimeOnTile = true;
+
+      if (Object.keys(next).length > 0) {
+        bucket.rideOverrides[rideId] = next;
+      } else {
+        delete bucket.rideOverrides[rideId];
+      }
+
+      syncDownSinceTimestamps(getAllRides());
+      persistAll(true);
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderAll();
+
+      if (fb) {
+        fb.textContent = 'Attraction & tile changes saved.';
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function clearSelectedRideOverride() {
+      if (!state.adminUnlocked) return;
+      const sel = document.getElementById('qov-ride-select');
+      if (!sel || !sel.value) return;
+      const bucket = getCurrentBucket();
+      delete bucket.rideOverrides[sel.value];
+      delete bucket.downSinceMap[sel.value];
+      persistAll(true);
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderAll();
+    }
+
+    function submitDowntimeRecord(e) {
+      e.preventDefault();
+      if (!state.adminUnlocked) return;
+      const sel = document.getElementById('dt-ride-select');
+      const reasonEl = document.getElementById('dt-reason-input');
+      const showTileEl = document.getElementById('dt-show-tile-checkbox');
+
+      const raw = getAllRides().find(r => r.id === (sel ? sel.value : ''));
+      const reason = reasonEl ? reasonEl.value.trim() : '';
+      const showOnTile = Boolean(showTileEl ? showTileEl.checked : false);
+      if (!raw || !reason) return;
+      const ride = getEffectiveRide(raw);
+
+      if (isPastRideClosing(ride.id, Date.now())) {
+        const fb = document.getElementById('qov-feedback');
+        if (fb) {
+          fb.textContent = `${ride.name} is currently Closed or past its closing hour (${ride.rideHoursText}).`;
+          fb.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const bucket = getCurrentBucket();
+      const closedAtMs = Date.now();
+      bucket.downtimeRecords.push({
+        id: `dt-${closedAtMs}-${Math.random().toString(36).slice(2, 6)}`,
+        attractionId: ride.id,
+        attractionName: ride.name,
+        reason,
+        closedAtMs,
+        reopenedAtMs: null,
+        durationMs: 0,
+        status: 'ACTIVE',
+        showOnTile
+      });
+      bucket.downSinceMap[ride.id] = closedAtMs;
+      persistAll(true);
+      renderAll();
+    }
+
+    function markDowntimeReopened(recordId) {
+      if (!state.adminUnlocked) return;
+      const bucket = getCurrentBucket();
+      const rec = bucket.downtimeRecords.find(r => r.id === recordId);
+      if (!rec) return;
+      const now = Date.now();
+      rec.status = 'COMPLETED';
+      rec.reopenedAtMs = now;
+      rec.durationMs = Math.max(0, now - rec.closedAtMs);
+      delete bucket.downSinceMap[rec.attractionId];
+      persistAll(true);
+      renderAll();
+    }
+
+    function clearCompletedDowntimeHistory() {
+      if (!state.adminUnlocked) return;
+      const bucket = getCurrentBucket();
+      bucket.downtimeRecords = bucket.downtimeRecords.filter(r => r.status === 'ACTIVE');
+      persistAll(true);
+      renderAll();
+    }
+
+    function addCustomAttraction(e) {
+      e.preventDefault();
+      if (!state.adminUnlocked) return;
+      const nameEl = document.getElementById('new-ride-name');
+      const catEl = document.getElementById('new-ride-cat');
+      const landEl = document.getElementById('new-ride-land');
+      const heightEl = document.getElementById('new-ride-height');
+      const msgEl = document.getElementById('new-ride-message');
+
+      const name = nameEl ? nameEl.value.trim() : '';
+      const category = catEl && RIDE_CATEGORIES.includes(catEl.value) ? catEl.value : 'Family';
+      const land = (landEl && landEl.value.trim()) || getCurrentConfig().shortName;
+      const minHeight = (heightEl && heightEl.value.trim()) || (category === 'Thrills' ? '1.2m' : '0.9m');
+      const customMsg = msgEl ? msgEl.value.trim() : '';
+      if (!name) return;
+
+      const newId = `${state.activeResort}-custom-${Date.now()}`;
+      const bucket = getCurrentBucket();
+      bucket.customRides.push({
+        id: newId,
+        name,
+        category,
+        land,
+        minHeight,
+        rawStatus: 'CLOSED',
+        waitTime: null,
+        x: 0.48,
+        y: 0.45
+      });
+
+      if (customMsg) {
+        bucket.rideOverrides[newId] = { customStatus: customMsg };
+      }
+
+      if (nameEl) nameEl.value = '';
+      if (landEl) landEl.value = '';
+      if (heightEl) heightEl.value = '';
+      if (msgEl) msgEl.value = '';
+
+      persistAll(true);
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderAll();
+    }
+
+    function removeSelectedAttraction() {
+      if (!state.adminUnlocked) return;
+      const sel = document.getElementById('rem-ride-select');
+      const rideId = sel ? sel.value : '';
+      if (!rideId) return;
+
+      const bucket = getCurrentBucket();
+      if (!bucket.removedIds.includes(rideId)) {
+        bucket.removedIds.push(rideId);
+      }
+      state.batchSelectedRideIds = state.batchSelectedRideIds.filter(id => id !== rideId);
+      if (state.selectedMapRideId === rideId) {
+        closeMapPinCard();
+      }
+      persistAll(true);
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderRemovedRidesList();
+      renderAll();
+    }
+
+    function restoreRemovedAttraction(rideId) {
+      if (!state.adminUnlocked) return;
+      const bucket = getCurrentBucket();
+      bucket.removedIds = bucket.removedIds.filter(id => id !== rideId);
+      persistAll(true);
+      populateAdminSelects();
+      renderBatchRidesChecklist();
+      renderRemovedRidesList();
+      renderAll();
+    }
+
+    function renderRemovedRidesList() {
+      const box = document.getElementById('removed-rides-container');
+      if (!box) return;
+      const bucket = getCurrentBucket();
+      if (bucket.removedIds.length === 0) {
+        box.innerHTML = `<div class="text-[11px] font-semibold text-slate-400">No removed attractions.</div>`;
+        return;
+      }
+
+      const known = getAllKnownRidesIncludingRemoved();
+      box.innerHTML = bucket.removedIds.map(id => {
+        const found = known.find(r => r.id === id);
+        const label = found ? found.name : id;
+        return `
+          <div class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs">
+            <span class="font-bold text-slate-700 truncate">${escapeHtml(label)}</span>
+            <button
+              type="button"
+              onclick="restoreRemovedAttraction('${escapeAttr(id)}')"
+              class="rounded-lg resort-bg-primary resort-bg-primary-hover px-2.5 py-1 text-[10px] font-extrabold text-white shrink-0 cursor-pointer"
+            >
+              Restore
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================
+    // LIVE THEMEPARKS.WIKI API SYNC (PER RESORT)
+    // =========================================================
+    async function fetchLiveParkData(resortKey = state.activeResort) {
+      const cfg = RESORT_CONFIGS[resortKey];
+      if (!cfg) return;
+
+      const endpoints = [
+        `https://api.themeparks.wiki/v1/entity/${cfg.entityId}/live`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://api.themeparks.wiki/v1/entity/${cfg.entityId}/live`)}`
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const liveItems = Array.isArray(data && data.liveData) ? data.liveData : [];
+          const attractions = liveItems.filter(item => item.entityType === 'ATTRACTION');
+          if (attractions.length > 0) {
+            state.apiRidesByResort[resortKey] = attractions.map((item, idx) => {
+              const normName = String(item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+              const fallback = cfg.defaultRides.find(
+                d => d.name.toLowerCase().replace(/[^a-z0-9]+/g, '') === normName
+              );
+              const standby = item.queue && item.queue.STANDBY && typeof item.queue.STANDBY.waitTime === 'number'
+                ? item.queue.STANDBY.waitTime
+                : null;
+              return {
+                id: item.id || (fallback ? fallback.id : `${resortKey}-api-${idx}`),
+                name: item.name,
+                category: fallback ? fallback.category : 'Family',
+                land: fallback ? fallback.land : cfg.shortName,
+                minHeight: fallback ? fallback.minHeight : '0.9m',
+                rawStatus: item.status || 'CLOSED',
+                waitTime: standby,
+                x: fallback ? fallback.x : 0.45 + ((idx % 5) * 0.04),
+                y: fallback ? fallback.y : 0.42 + ((idx % 4) * 0.05)
+              };
+            });
+
+            if (resortKey === state.activeResort) {
+              syncDownSinceTimestamps(getAllRides());
+              renderAll();
+            }
+            return;
+          }
+        } catch {}
+      }
+      if (resortKey === state.activeResort) {
+        syncDownSinceTimestamps(getAllRides());
+        renderAll();
+      }
+    }
+
+    function manualSyncNow() {
+      state.countdown = REFRESH_INTERVAL_SEC;
+      setText('countdown-sec', state.countdown);
+      setText('queues-countdown-sec', state.countdown);
+      pullCloudState(true);
+      fetchLiveParkData(state.activeResort);
+    }
+
+    function renderAll() {
+      applyResortBranding();
+      applyFeatureAvailabilityUi();
+      renderParkHoursDisplays();
+      updateCountsAndOverview();
+      renderRidesList();
+      renderDowntimeLogs();
+      drawMaps();
+    }
+
+    // =========================================================
+    // BOOTSTRAP, CLOUD POLLING & 1-SECOND LIVE TICKER
+    // =========================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      applyResortBranding();
+      switchTab('rides');
+      syncCategoryTabUi();
+      renderZonePills();
+      setupMapInteractions();
+      syncDownSinceTimestamps(getAllRides());
+      renderAll();
+
+      pullCloudState(true);
+      fetchLiveParkData(state.activeResort);
+
+      window.addEventListener('resize', drawMaps);
+      window.addEventListener('focus', () => pullCloudState(false));
+
+      setInterval(() => {
+        pullCloudState(false);
+      }, CLOUD_POLL_INTERVAL_MS);
+
+      setInterval(() => {
+        state.countdown -= 1;
+        if (state.countdown <= 0) {
+          state.countdown = REFRESH_INTERVAL_SEC;
+          fetchLiveParkData(state.activeResort);
+        }
+        setText('countdown-sec', state.countdown);
+        setText('queues-countdown-sec', state.countdown);
+        syncDownSinceTimestamps(getAllRides());
+        renderDowntimeLogs();
+        if (state.activeTab === 'rides') {
+          renderRidesList();
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
